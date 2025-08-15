@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spark-simplicity"
+name = "spark_simplicity"
 version = "1.0.0"
 authors = [
     {name = "F. Barrios", email = "fabienbarrios@gmail.com"},
@@ -65,10 +65,10 @@ database = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/FabienBarrios/spark-simplicity"
-Documentation = "https://spark-simplicity.readthedocs.io"
-Repository = "https://github.com/FabienBarrios/spark-simplicity.git"
-Issues = "https://github.com/FabienBarrios/spark-simplicity/issues"
+Homepage = "https://github.com/FabienBarrios/spark_simplicity"
+Documentation = "https://spark_simplicity.readthedocs.io"
+Repository = "https://github.com/FabienBarrios/spark_simplicity.git"
+Issues = "https://github.com/FabienBarrios/spark_simplicity/issues"
 
 [tool.setuptools]
 packages = ["spark_simplicity"]
