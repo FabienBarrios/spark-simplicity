@@ -25,7 +25,7 @@ Spark Simplicity is a production-ready Python package that simplifies Apache Spa
 ### Installation
 
 ```bash
-pip install spark-simplicity
+pip install spark_simplicity
 ```
 
 ### Basic Usage
