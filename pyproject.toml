@@ -3,21 +3,20 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spark_simplicity"
+name = "spark-simplicity"
 version = "1.0.0"
 authors = [
     {name = "F. Barrios", email = "fabienbarrios@gmail.com"},
 ]
 description = "Simplify Apache Spark operations with an intuitive Python API"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Scientific/Engineering :: Information Analysis",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -65,13 +64,13 @@ database = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/FabienBarrios/spark_simplicity"
-Documentation = "https://spark_simplicity.readthedocs.io"
-Repository = "https://github.com/FabienBarrios/spark_simplicity.git"
-Issues = "https://github.com/FabienBarrios/spark_simplicity/issues"
+Homepage = "https://github.com/FabienBarrios/spark-simplicity"
+Documentation = "https://spark-simplicity.readthedocs.io"
+Repository = "https://github.com/FabienBarrios/spark-simplicity.git"
+Issues = "https://github.com/FabienBarrios/spark-simplicity/issues"
 
-[tool.setuptools]
-packages = ["spark_simplicity"]
+[tool.setuptools.packages.find]
+where = ["."]
 
 [tool.setuptools.package-data]
 spark_simplicity = ["py.typed"]

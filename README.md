@@ -1,9 +1,11 @@
 # Spark Simplicity 🚀
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Spark 3.5+](https://img.shields.io/badge/Spark-3.5+-orange.svg)](https://spark.apache.org/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 
 **Transform complex PySpark operations into simple, readable code.**
 
@@ -25,7 +27,7 @@ Spark Simplicity is a production-ready Python package that simplifies Apache Spa
 ### Installation
 
 ```bash
-pip install spark_simplicity
+pip install spark-simplicity
 ```
 
 ### Basic Usage
@@ -195,7 +197,7 @@ logger.error("Processing failed")
 ## 📖 Architecture
 
 ```
-spark_simplicity/
+spark-simplicity/
 ├── session.py              # Spark session management
 ├── io/                     # I/O operations
 │   ├── readers/            # CSV, JSON, Parquet, Excel readers
