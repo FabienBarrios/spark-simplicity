@@ -24,7 +24,7 @@ Key Features:
 
 __version__ = "1.0.0"
 __author__ = "F. Barrios"
-__email__ = "fabien.barrios@ciup.fr"
+__email__ = "fabienbarrios@gmail.com"
 __license__ = "MIT"
 __description__ = "Simplify Apache Spark operations with an intuitive Python " "API"
 
