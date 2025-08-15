@@ -325,7 +325,6 @@ Comprehensive testing with multiple levels:
 Coverage targets:
 - **Minimum**: 90% overall coverage
 - **Target**: 95%+ for core modules
-- **session.py**: 100% coverage achieved
 
 ## 🔒 Security
 
@@ -359,6 +358,79 @@ We welcome contributions! Please see our contributing guidelines:
 - 🐛 **Bug fixes** - Report and fix issues
 - 💡 **Feature requests** - Suggest new functionality
 
+## 🗺️ Roadmap & Future Development
+
+Spark Simplicity is actively evolving to meet the growing needs of the data engineering community. We're committed to continuous improvement and regularly adding new features based on user feedback and industry best practices.
+
+### 🚀 Upcoming Features (v1.1.x)
+
+- **🔄 Advanced Join Operations**
+  - Window joins for time-series data
+  - Fuzzy matching joins
+  - Multi-table join optimization
+  - Join performance analysis tools
+
+- **📊 Enhanced DataFrame Utilities**
+  - Data profiling and quality metrics
+  - Automated schema validation
+  - Smart partitioning recommendations
+  - Performance bottleneck detection
+
+- **🌊 Streaming Support**
+  - Simplified Kafka integration
+  - Real-time data processing utilities
+  - Stream-to-batch conversion helpers
+  - Monitoring and alerting for streams
+
+### 🎯 Future Versions (v1.2.x+)
+
+- **🤖 Machine Learning Integration**
+  - MLlib workflow simplification
+  - Feature engineering utilities
+  - Model deployment helpers
+  - Pipeline automation tools
+
+- **☁️ Cloud Platform Support**
+  - AWS S3/EMR optimizations
+  - Azure Data Lake integration
+  - Google Cloud Platform support
+  - Multi-cloud deployment tools
+
+- **📈 Advanced Analytics**
+  - SQL query builder with type safety
+  - Data lineage tracking
+  - Performance benchmarking suite
+  - Cost optimization recommendations
+
+### 🌟 Long-term Vision (v2.0+)
+
+- **🏗️ Next-Generation Architecture**
+  - Spark 4.0 compatibility
+  - Async operations support
+  - Plugin architecture for extensibility
+  - Advanced monitoring dashboard
+
+- **🔗 Extended Ecosystem**
+  - Delta Lake deep integration
+  - Apache Iceberg support
+  - Kubernetes-native operations
+  - GraphQL API for metadata
+
+### 🤝 Community-Driven Development
+
+We actively listen to our community and prioritize features based on:
+- **User feedback** and feature requests
+- **Industry trends** and emerging technologies
+- **Performance improvements** and optimization opportunities
+- **Security enhancements** and compliance requirements
+
+**Want to influence our roadmap?** 
+- 💡 Submit feature requests in [GitHub Issues](https://github.com/FabienBarrios/spark-simplicity/issues)
+- 🗣️ Join discussions in [GitHub Discussions](https://github.com/FabienBarrios/spark-simplicity/discussions)
+- 🤝 Contribute code and become a collaborator
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -373,7 +445,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/FabienBarrios/spark-simplicity/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/FabienBarrios/spark-simplicity/discussions)
-- 📧 **Contact**: fabien.barrios@ciup.fr
+- 📧 **Contact**: fabienbarrios@gmail.com
 - 📖 **Documentation**: [Read the Docs](https://spark-simplicity.readthedocs.io)
 
 ---
