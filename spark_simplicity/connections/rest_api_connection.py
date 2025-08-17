@@ -433,7 +433,7 @@ class RestApiConnection:
             "DELETE", endpoint, params=params, extra_headers=extra_headers
         )
 
-    def close(self):
+    def close(self) -> None:
         """
         Gracefully close HTTP session and cleanup connection resources.
 
