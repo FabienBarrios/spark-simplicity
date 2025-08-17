@@ -2,15 +2,20 @@
 Spark Simplicity - Database Connection Manager
 =============================================
 
-Enterprise-grade JDBC database connectivity with singleton pattern, optimized SQL Server integration,
-and production-ready connection management. This module provides secure, efficient database access
-for Spark data processing workflows, enabling seamless integration with enterprise data systems,
+Enterprise-grade JDBC database connectivity with singleton pattern, optimized SQL Server
+integration,
+and production-ready connection management. This module provides secure, efficient
+database access
+for Spark data processing workflows, enabling seamless integration with enterprise
+data systems,
 ETL pipelines, and analytical processing operations.
 
 Key Features:
     - **Singleton Pattern**: One connection instance per unique database configuration
-    - **SQL Server Optimization**: Specialized JDBC configuration for Microsoft SQL Server
-    - **Connection Pooling**: Efficient resource management with automatic connection reuse
+    - **SQL Server Optimization**: Specialized JDBC configuration for Microsoft
+      SQL Server
+    - **Connection Pooling**: Efficient resource management with automatic
+      connection reuse
     - **Security Features**: Encrypted connections with certificate validation options
     - **Performance Tuning**: Optimized fetch sizes and query execution strategies
     - **Enterprise Integration**: Compatible with corporate SQL Server deployments
@@ -29,20 +34,29 @@ Database Connectivity:
     - Query execution optimization for analytical workloads
 
 Enterprise Integration:
-    - **Corporate SQL Server**: Seamless integration with enterprise SQL Server instances
-    - **Data Warehouse Connectivity**: Optimized access to data warehouse and OLAP systems
-    - **ETL Pipeline Support**: High-performance data extraction for processing workflows
-    - **Security Compliance**: Encrypted connections meeting enterprise security requirements
-    - **Resource Management**: Efficient connection lifecycle management for production environments
+    - **Corporate SQL Server**: Seamless integration with enterprise SQL Server
+      instances
+    - **Data Warehouse Connectivity**: Optimized access to data warehouse and
+      OLAP systems
+    - **ETL Pipeline Support**: High-performance data extraction for processing
+      workflows
+    - **Security Compliance**: Encrypted connections meeting enterprise security
+      requirements
+    - **Resource Management**: Efficient connection lifecycle management for
+      production environments
 
 Usage:
     This module is designed for enterprise data processing scenarios requiring
-    reliable, high-performance database connectivity integrated with Spark analytics workflows.
+    reliable, high-performance database connectivity integrated with Spark analytics
+    workflows.
 
-    from spark_simplicity.connections.database_connection import JdbcSqlServerConnection
+    from spark_simplicity.connections.database_connection import (
+        JdbcSqlServerConnection
+    )
 """
 
 import hashlib
+import logging
 from typing import Dict, Optional
 
 from pyspark.sql import DataFrame, SparkSession
@@ -50,64 +64,93 @@ from pyspark.sql import DataFrame, SparkSession
 
 class JdbcSqlServerConnection:
     """
-    Enterprise-grade JDBC SQL Server connection manager with singleton pattern and performance optimization.
+    Enterprise-grade JDBC SQL Server connection manager with singleton pattern and
+    performance optimization.
 
-    Provides secure, high-performance database connectivity for Spark data processing workflows with
-    intelligent connection management, query optimization, and enterprise-grade security features.
-    This class implements the singleton pattern to ensure efficient resource utilization while
+    Provides secure, high-performance database connectivity for Spark data processing
+    workflows with
+    intelligent connection management, query optimization, and enterprise-grade security
+    features.
+    This class implements the singleton pattern to ensure efficient resource utilization
+    while
     maintaining connection isolation between different database configurations.
 
-    The connection manager is specifically optimized for Microsoft SQL Server environments with
-    enterprise security features, performance tuning, and production-ready connection lifecycle
-    management. It handles encrypted connections, query partitioning, and resource optimization
-    automatically while providing a simple, consistent interface for database operations.
+    The connection manager is specifically optimized for Microsoft SQL Server
+    environments with
+    enterprise security features, performance tuning, and production-ready connection
+    lifecycle
+    management. It handles encrypted connections, query partitioning, and resource
+    optimization
+    automatically while providing a simple, consistent interface for database
+    operations.
 
     Key Capabilities:
-        - **Singleton Management**: One connection instance per unique database configuration
-        - **SQL Server Optimization**: Specialized configuration for Microsoft SQL Server
+        - **Singleton Management**: One connection instance per unique database
+          configuration
+        - **SQL Server Optimization**: Specialized configuration for Microsoft
+          SQL Server
         - **Security Features**: Encrypted connections with certificate validation
         - **Performance Tuning**: Optimized fetch sizes and query execution strategies
         - **Resource Efficiency**: Automatic connection reuse and lifecycle management
-        - **Enterprise Ready**: Production-grade error handling and monitoring integration
+        - **Enterprise Ready**: Production-grade error handling and monitoring
+          integration
 
     Attributes:
         _instances: Class-level dictionary maintaining singleton instances keyed by
-                   unique database configuration (application + host + port + database).
-                   Ensures efficient resource utilization and prevents connection proliferation.
+                   unique database configuration (application + host + port +
+                   database).
+                   Ensures efficient resource utilization and prevents connection
+                   proliferation.
     """
 
     _instances: Dict[str, "JdbcSqlServerConnection"] = {}
 
-    def __new__(cls, spark: SparkSession, config: Dict[str, str], logger):
+    def __new__(
+        cls, spark: SparkSession, config: Dict[str, str], logger: logging.Logger
+    ) -> "JdbcSqlServerConnection":
         """
-        Create or retrieve JDBC connection instance using singleton pattern for resource efficiency.
+        Create or retrieve JDBC connection instance using singleton pattern for
+        resource efficiency.
 
-        Implements sophisticated singleton logic based on unique database connection parameters
-        to ensure optimal resource utilization while maintaining connection isolation between
-        different database configurations. This approach prevents connection proliferation and
+        Implements sophisticated singleton logic based on unique database connection
+        parameters
+        to ensure optimal resource utilization while maintaining connection isolation
+        between
+        different database configurations. This approach prevents connection
+        proliferation
+        and
         enables efficient reuse of established connections across multiple operations.
 
         Args:
-            spark: Active SparkSession instance used for database connectivity and DataFrame operations.
-                  Must have appropriate JDBC driver dependencies configured for SQL Server connectivity.
-                  Used for application identification and connection lifecycle management.
+            spark: Active SparkSession instance used for database connectivity and
+                   DataFrame operations.
+                  Must have appropriate JDBC driver dependencies configured for SQL
+                  Server connectivity.
+                  Used for application identification and connection lifecycle
+                  management.
             config: Database connection configuration dictionary containing:
                    - 'host': SQL Server hostname or IP address (required)
                    - 'port': SQL Server port number (default: '1433')
                    - 'database': Target database name (required)
                    - 'user': Database authentication username (required)
                    - 'password': Database authentication password (required)
-                   Additional SQL Server-specific options supported for advanced configurations.
-            logger: Logger instance for connection events, query logging, and error reporting.
-                   Used for operational monitoring and troubleshooting database operations.
+                   Additional SQL Server-specific options supported for advanced
+                   configurations.
+            logger: Logger instance for connection events, query logging, and error
+                    reporting.
+                   Used for operational monitoring and troubleshooting database
+                   operations.
 
         Returns:
-            JdbcSqlServerConnection instance - either newly created or existing singleton
+            JdbcSqlServerConnection instance - either newly created or existing
+            singleton
             configured for the specified database connection parameters.
 
         Singleton Logic:
-            **Unique Key Generation**: SHA-256 hash of application ID, host, port, and database
-            **Instance Reuse**: Existing connections returned for matching configurations
+            **Unique Key Generation**: SHA-256 hash of application ID, host, port,
+                                      and database
+            **Instance Reuse**: Existing connections returned for matching
+                                configurations
             **Resource Efficiency**: Prevents duplicate connections to same database
             **Isolation**: Separate instances for different database configurations
         """
@@ -124,32 +167,44 @@ class JdbcSqlServerConnection:
             cls._instances[key]._init(spark, config, logger)
         return cls._instances[key]
 
-    def _init(self, spark: SparkSession, config: Dict[str, str], logger):
+    def _init(
+        self, spark: SparkSession, config: Dict[str, str], logger: logging.Logger
+    ) -> None:
         """
-        Initialize JDBC SQL Server connection with comprehensive configuration and security setup.
+        Initialize JDBC SQL Server connection with comprehensive configuration and
+        security setup.
 
-        Performs one-time initialization including connection string construction, security
+        Performs one-time initialization including connection string construction,
+        security
         configuration, performance optimization, and authentication setup. This method
         configures enterprise-grade database connectivity with SQL Server-specific
-        optimizations for reliable, high-performance data access in production environments.
+        optimizations for reliable, high-performance data access in production
+        environments.
 
         Args:
             spark: SparkSession instance for database operations and DataFrame creation
-            config: Database configuration dictionary with connection parameters and credentials
-            logger: Logger instance for connection monitoring and operational diagnostics
+            config: Database configuration dictionary with connection parameters and
+                    credentials
+            logger: Logger instance for connection monitoring and operational
+                    diagnostics
 
         Configuration Process:
             1. Extract and validate database connection parameters
             2. Construct optimized JDBC URL with security and performance options
-            3. Configure base connection options including driver and performance settings
+            3. Configure base connection options including driver and performance
+               settings
             4. Set up encrypted connections with certificate validation
             5. Log connection initialization for operational monitoring
 
         Security Features:
-            **Encrypted Connections**: Automatic TLS/SSL encryption for data transmission
-            **Certificate Handling**: Configurable certificate validation for enterprise environments
-            **Credential Management**: Secure handling of database authentication credentials
-            **Connection Security**: Enterprise-grade security configuration for SQL Server
+            **Encrypted Connections**: Automatic TLS/SSL encryption for data
+                                      transmission
+            **Certificate Handling**: Configurable certificate validation for
+                                     enterprise environments
+            **Credential Management**: Secure handling of database authentication
+                                      credentials
+            **Connection Security**: Enterprise-grade security configuration for
+                                    SQL Server
         """
         self.spark = spark
         self.logger = logger
@@ -174,52 +229,65 @@ class JdbcSqlServerConnection:
         }
 
         self.logger.info(
-            f"SQL Server connection initialized: host={self.host}, port={self.port}, db={self.database}, "
-            f"user={self.user}"
+            f"SQL Server connection initialized: host={self.host}, port={self.port}, "
+            f"db={self.database}, user={self.user}"
         )
 
     def query(
         self, sql: str, partitioning: Optional[Dict[str, str]] = None
     ) -> DataFrame:
         """
-        Execute SQL query against SQL Server database with optimized performance and optional partitioning.
+        Execute SQL query against SQL Server database with optimized performance and
+        optional partitioning.
 
-        Provides high-performance SQL query execution with intelligent result set handling,
+        Provides high-performance SQL query execution with intelligent result set
+        handling,
         configurable partitioning for large datasets, and comprehensive error handling.
         This method is optimized for analytical workloads, ETL operations, and data
-        processing workflows requiring efficient data extraction from SQL Server databases.
+        processing workflows requiring efficient data extraction from SQL Server
+        databases.
 
         Args:
             sql: SQL query string to execute against the target database:
                 - Standard SQL SELECT statements for data retrieval
-                - Complex analytical queries with joins, aggregations, and window functions
+                - Complex analytical queries with joins, aggregations, and window
+                  functions
                 - Stored procedure calls and parameterized queries
                 - Data warehouse and OLAP query patterns
                 - Must be valid SQL Server T-SQL syntax for optimal performance
-            partitioning: Optional dictionary configuring query partitioning for large result sets:
-                         - 'numPartitions': Number of parallel partitions for query execution
-                         - 'partitionColumn': Column name for partition-based data distribution
+            partitioning: Optional dictionary configuring query partitioning for large
+                         result sets:
+                         - 'numPartitions': Number of parallel partitions for query
+                           execution
+                         - 'partitionColumn': Column name for partition-based data
+                           distribution
                          - 'lowerBound': Lower boundary value for partition column
                          - 'upperBound': Upper boundary value for partition column
-                         - 'fetchsize': Override default fetch size for specific query requirements
-                         Partitioning enables parallel processing of large datasets across cluster.
+                         - 'fetchsize': Override default fetch size for specific query
+                           requirements
+                         Partitioning enables parallel processing of large datasets
+                         across cluster.
 
         Returns:
             Spark DataFrame containing query results:
-            - Distributed DataFrame with automatic schema inference from SQL Server metadata
+            - Distributed DataFrame with automatic schema inference from SQL Server
+              metadata
             - Lazy evaluation enabling further Spark transformations and optimizations
-            - Optimized data transfer with configurable fetch sizes and parallel processing
+            - Optimized data transfer with configurable fetch sizes and parallel
+              processing
             - Proper data type mapping from SQL Server types to Spark DataFrame schema
 
         Performance Optimization:
             **Query Execution**:
             - Optimized JDBC driver configuration for SQL Server connectivity
-            - Efficient fetch size configuration balancing memory usage and transfer speed
+            - Efficient fetch size configuration balancing memory usage and transfer
+              speed
             - Connection reuse across multiple queries for improved performance
             - Parallel query execution when partitioning parameters are specified
 
             **Data Transfer**:
-            - Streaming data transfer for memory-efficient processing of large result sets
+            - Streaming data transfer for memory-efficient processing of large
+              result sets
             - Automatic schema inference reducing metadata overhead
             - Optimized data type conversion for Spark DataFrame compatibility
             - Network optimization for enterprise database connectivity
@@ -287,7 +355,8 @@ class JdbcSqlServerConnection:
         Note:
             This method constructs queries as subqueries for JDBC compatibility while
             maintaining query optimization and performance. The connection singleton
-            pattern ensures efficient resource utilization across multiple query operations.
+            pattern ensures efficient resource utilization across multiple query
+            operations.
         """
         # self.logger.warn("SQL Execution: " + sql.replace("\n", " "))
         dbtable = f"({sql}) subquery"
