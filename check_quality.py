@@ -6,6 +6,7 @@ Runs all quality checks and provides a comprehensive report.
 Used in CI/CD pipelines and pre-commit hooks.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -19,7 +20,7 @@ class CheckResult(NamedTuple):
     output: str
 
 
-def run_command(name: str, command: str) -> CheckResult:
+def run_command(name: str, command: str, allow_warnings: bool = False) -> CheckResult:
     """Run a command and capture its result."""
     print(f"🔍 Running {name}...")
     
@@ -29,10 +30,16 @@ def run_command(name: str, command: str) -> CheckResult:
             shell=True,
             capture_output=True,
             text=True,
-            cwd=Path(__file__).parent.parent
+            cwd=Path(__file__).parent,
+            env=os.environ.copy()
         )
         
-        success = result.returncode == 0
+        # For Bandit, consider it successful if JSON report is generated
+        if allow_warnings and "JSON output written to file" in (result.stdout + result.stderr):
+            success = True
+        else:
+            success = result.returncode == 0
+            
         output = result.stdout + result.stderr
         
         if success:
@@ -53,19 +60,19 @@ def main():
     print("=" * 50)
     
     checks = [
-        ("Code Formatting (Black)", "black --check spark_simplicity/ tests/"),
-        ("Import Sorting (isort)", "isort --check-only spark_simplicity/ tests/"),
-        ("Linting (Flake8)", "flake8 spark_simplicity/ tests/"),
-        ("Type Checking (MyPy)", "mypy spark_simplicity/"),
-        ("Security Check (Bandit)", "bandit -r spark_simplicity/ -f json -o bandit_report.json || true"),
-        ("Unit Tests", "pytest tests/ -m 'not integration and not performance' --tb=short"),
-        ("Test Coverage", "pytest tests/ --cov=spark_simplicity --cov-fail-under=90 --tb=short"),
+        ("Code Formatting (Black)", "black --check spark_simplicity/ tests/", False),
+        ("Import Sorting (isort)", "isort --check-only spark_simplicity/ tests/", False),
+        ("Linting (Flake8)", "flake8 spark_simplicity/ tests/", False),
+        ("Type Checking (MyPy)", "mypy spark_simplicity/", False),
+        ("Security Check (Bandit)", "bandit -r spark_simplicity/ -f json -o bandit_report.json", True),
+        ("Unit Tests", 'python -m pytest tests/ -m "not integration and not performance" --tb=short', False),
+        ("Test Coverage", "python -m pytest tests/ --cov=spark_simplicity --cov-fail-under=90 --tb=short", False),
     ]
     
     results: List[CheckResult] = []
     
-    for name, command in checks:
-        result = run_command(name, command)
+    for name, command, allow_warnings in checks:
+        result = run_command(name, command, allow_warnings)
         results.append(result)
         print()
     
@@ -80,13 +87,17 @@ def main():
         status = "✅ PASS" if result.success else "❌ FAIL"
         print(f"{status} {result.name}")
         
-        if not result.success and result.output.strip():
-            # Show first few lines of error output
-            lines = result.output.strip().split('\n')[:5]
-            for line in lines:
-                print(f"    {line}")
-            if len(result.output.split('\n')) > 5:
-                print("    ...")
+        if not result.success:
+            print(f"    Command: {result.command}")
+            print(f"    Exit code: (non-zero)")
+            if result.output.strip():
+                # Show more lines for test failures to understand the issue
+                max_lines = 10 if "pytest" in result.command else 5
+                lines = result.output.strip().split('\n')[:max_lines]
+                for line in lines:
+                    print(f"    {line}")
+                if len(result.output.split('\n')) > max_lines:
+                    print("    ...")
     
     print()
     print(f"Results: {passed}/{total} checks passed")
