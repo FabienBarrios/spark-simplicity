@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spark-simplicity"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     {name = "F. Barrios", email = "fabienbarrios@gmail.com"},
 ]

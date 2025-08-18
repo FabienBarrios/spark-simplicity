@@ -24,7 +24,6 @@ Key Features:
 
 import os
 
-__version__ = "1.0.0"
 __author__ = "F. Barrios"
 __email__ = "fabienbarrios@gmail.com"
 __license__ = "MIT"
