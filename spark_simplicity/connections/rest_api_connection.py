@@ -8,12 +8,16 @@ Spark data processing workflows, enabling seamless integration with web services
 microservices, and external data sources through standardized REST interfaces.
 
 Key Features:
-    - **Singleton Pattern**: One connection instance per unique API endpoint configuration
-    - **Intelligent Retry Logic**: Configurable retry strategies with exponential backoff
+    - **Singleton Pattern**: One connection instance per unique API endpoint
+      configuration
+    - **Intelligent Retry Logic**: Configurable retry strategies with exponential
+      backoff
     - **Session Management**: Persistent HTTP sessions for optimal connection reuse
-    - **Authentication Support**: Flexible authentication mechanisms (token, basic, custom)
+    - **Authentication Support**: Flexible authentication mechanisms
+      (token, basic, custom)
     - **Production Safety**: Comprehensive error handling and request/response logging
-    - **HTTP Method Coverage**: Full REST API method support (GET, POST, PUT, PATCH, DELETE)
+    - **HTTP Method Coverage**: Full REST API method support
+      (GET, POST, PUT, PATCH, DELETE)
 
 HTTP Features:
     **Request Management**:
@@ -33,7 +37,8 @@ Enterprise Integration:
     - **Microservices Architecture**: Optimized for service-to-service communication
     - **Data Pipeline Support**: Integration with ETL workflows and data ingestion
     - **Security Compliance**: Support for enterprise authentication and authorization
-    - **Monitoring Integration**: Detailed request/response logging for operational visibility
+    - **Monitoring Integration**: Detailed request/response logging for operational
+      visibility
 
 Usage:
     This module is designed for enterprise data processing scenarios requiring
@@ -42,7 +47,8 @@ Usage:
     from spark_simplicity.connections.rest_api_connection import RestApiConnection
 """
 
-from typing import Any, Dict, Optional, Union
+import logging
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from requests.adapters import HTTPAdapter, Retry
@@ -50,12 +56,13 @@ from requests.adapters import HTTPAdapter, Retry
 
 class RestApiConnection:
     """
-    Enterprise-grade REST API client with singleton pattern and intelligent retry mechanisms.
+    Enterprise-grade REST API client with singleton pattern and intelligent retry
+    mechanisms.
 
-    Provides comprehensive REST API connectivity for Spark data processing workflows with
-    intelligent connection management, automatic retry logic, and enterprise-grade error
-    handling. The singleton pattern ensures efficient resource utilization by maintaining
-    one HTTP session per unique API endpoint configuration.
+    Provides comprehensive REST API connectivity for Spark data processing workflows
+    with intelligent connection management, automatic retry logic, and enterprise-grade
+    error handling. The singleton pattern ensures efficient resource utilization by
+    maintaining one HTTP session per unique API endpoint configuration.
 
     This class is specifically designed for production environments requiring reliable
     API integration, comprehensive error handling, and optimal resource management.
@@ -76,9 +83,11 @@ class RestApiConnection:
                    resource utilization and prevents session proliferation.
     """
 
-    _instances = {}
+    _instances: Dict[str, "RestApiConnection"] = {}
 
-    def __new__(cls, spark, config: Dict[str, Any], logger=None):
+    def __new__(
+        cls, spark: Any, config: Dict[str, Any], logger: Optional[logging.Logger] = None
+    ) -> "RestApiConnection":
         """
         Create or retrieve REST API connection instance using singleton pattern.
 
@@ -95,7 +104,8 @@ class RestApiConnection:
                    - 'timeout': Request timeout in seconds (default: 10)
                    - 'retries': Maximum retry attempts (default: 3)
                    - 'backoff_factor': Exponential backoff multiplier (default: 0.3)
-                   - 'status_forcelist': HTTP status codes to retry (default: [500,502,503,504])
+                   - 'status_forcelist': HTTP status codes to retry
+                     (default: [500,502,503,504])
             logger: Logger instance for request/response monitoring
 
         Returns:
@@ -108,7 +118,12 @@ class RestApiConnection:
             cls._instances[key] = instance
         return cls._instances[key]
 
-    def __init_once__(self, spark, config: Dict[str, Any], logger=None):
+    def __init_once__(
+        self,
+        spark: Any,
+        config: Dict[str, Any],
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
         """
         Initialize REST API connection with comprehensive session configuration.
 
@@ -136,7 +151,7 @@ class RestApiConnection:
         self.logger = logger
         self.base_url = config.get("base_url")
         self.headers = config.get("headers", {})
-        self.auth = config.get("auth")  # tuple (user, pass) or token, etc.
+        self.auth = config.get("auth")
         self.timeout = config.get("timeout", 10)
 
         self.session = requests.Session()
@@ -177,9 +192,10 @@ class RestApiConnection:
         data: Optional[Any] = None,
         json: Optional[Any] = None,
         extra_headers: Optional[Dict[str, str]] = None,
-    ) -> tuple[int, Union[Dict, list, str, None]]:
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
-        Execute HTTP request with intelligent response parsing and comprehensive error handling.
+        Execute HTTP request with intelligent response parsing and comprehensive error
+        handling.
 
         Provides the core HTTP request functionality with automatic URL construction,
         intelligent response parsing based on content type, and robust error handling.
@@ -188,8 +204,10 @@ class RestApiConnection:
 
         Args:
             method: HTTP method to execute (GET, POST, PUT, PATCH, DELETE)
-            endpoint: API endpoint path relative to base URL (leading/trailing slashes handled)
-            params: URL query parameters dictionary for GET requests and parameter passing
+            endpoint: API endpoint path relative to base URL
+            (leading/trailing slashes handled)
+            params: URL query parameters dictionary for GET requests and parameter
+            passing
             data: Request body data for form-encoded or raw data transmission
             json: JSON payload for requests requiring JSON content-type
             extra_headers: Additional HTTP headers to merge with default headers
@@ -205,7 +223,8 @@ class RestApiConnection:
         Response Processing:
             1. **URL Construction**: Intelligent joining of base URL and endpoint
             2. **Header Merging**: Combination of default and request-specific headers
-            3. **Request Execution**: HTTP request with configured timeout and retry logic
+            3. **Request Execution**: HTTP request with configured timeout and retry
+               logic
             4. **Content Parsing**: Intelligent parsing based on response content-type
             5. **Error Handling**: Comprehensive exception management and logging
 
@@ -218,6 +237,8 @@ class RestApiConnection:
         Raises:
             requests.RequestException: For network connectivity, timeout, or HTTP errors
         """
+        if self.base_url is None:
+            raise ValueError("base_url is not configured")
         url = self.base_url.rstrip("/") + "/" + endpoint.lstrip("/")
         headers = self.headers.copy()
         if extra_headers:
@@ -243,11 +264,9 @@ class RestApiConnection:
             content_type = response.headers.get("Content-Type", "")
             content_text = response.text.strip()
 
-            # empty body
             if not content_text:
                 return status_code, None
 
-            # JSON response
             if "application/json" in content_type.lower():
                 try:
                     payload = response.json()
@@ -255,9 +274,8 @@ class RestApiConnection:
                 except ValueError as ve:
                     if self.logger:
                         self.logger.error(f"JSON parsing error: {ve}")
-                    return status_code, content_text  # Return raw text if JSON invalid
+                    return status_code, content_text
 
-            # If not JSON, return raw text (e.g., text, html, etc.)
             return status_code, content_text
 
         except requests.RequestException as e:
@@ -270,7 +288,7 @@ class RestApiConnection:
         endpoint: str,
         params: Optional[Dict[str, Any]] = None,
         extra_headers: Optional[Dict[str, str]] = None,
-    ):
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
         Execute HTTP GET request for data retrieval and API querying.
 
@@ -305,7 +323,7 @@ class RestApiConnection:
         data: Optional[Any] = None,
         json: Optional[Any] = None,
         extra_headers: Optional[Dict[str, str]] = None,
-    ):
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
         Execute HTTP POST request for resource creation and data submission.
 
@@ -342,7 +360,7 @@ class RestApiConnection:
         data: Optional[Any] = None,
         json: Optional[Any] = None,
         extra_headers: Optional[Dict[str, str]] = None,
-    ):
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
         Execute HTTP PUT request for resource updates and replacements.
 
@@ -373,7 +391,14 @@ class RestApiConnection:
             "PUT", endpoint, data=data, json=json, extra_headers=extra_headers
         )
 
-    def patch(self, endpoint: str, *, data=None, json=None, extra_headers=None):
+    def patch(
+        self,
+        endpoint: str,
+        *,
+        data: Optional[Any] = None,
+        json: Optional[Any] = None,
+        extra_headers: Optional[Dict[str, str]] = None,
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
         Execute HTTP PATCH request for partial resource updates.
 
@@ -398,13 +423,19 @@ class RestApiConnection:
 
             Incremental data updates:
              status, result = api.patch('/datasets/daily',
-                                      json={'last_updated': timestamp, 'record_count': count})
+              json={'last_updated': timestamp, 'record_count': count})
         """
         return self._request(
             "PATCH", endpoint, data=data, json=json, extra_headers=extra_headers
         )
 
-    def delete(self, endpoint: str, *, params=None, extra_headers=None):
+    def delete(
+        self,
+        endpoint: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        extra_headers: Optional[Dict[str, str]] = None,
+    ) -> Tuple[int, Union[Dict[str, Any], List[Any], str, None]]:
         """
         Execute HTTP DELETE request for resource removal and cleanup operations.
 

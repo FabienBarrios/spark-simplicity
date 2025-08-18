@@ -48,7 +48,6 @@ def get_logger(name: str) -> logging.Logger:
 
     # Avoid adding multiple handlers
     if not logger.handlers:
-        # Console handler
         console_handler = logging.StreamHandler(sys.stdout)
         formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
         console_handler.setFormatter(formatter)

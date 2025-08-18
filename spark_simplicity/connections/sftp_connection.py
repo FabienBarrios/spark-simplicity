@@ -2,9 +2,12 @@
 Spark Simplicity - SFTP Connection Manager
 ==========================================
 
-Enterprise-grade SFTP connection management with singleton pattern, automatic retry logic,
-and production-ready error handling. This module provides secure file transfer capabilities
-for Spark data processing workflows, enabling reliable data exchange with remote systems,
+Enterprise-grade SFTP connection management with singleton pattern, automatic retry
+logic,
+and production-ready error handling. This module provides secure file transfer
+capabilities
+for Spark data processing workflows, enabling reliable data exchange with remote
+systems,
 ETL pipeline integration, and automated file processing operations.
 
 Key Features:
@@ -32,9 +35,10 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import time
-from typing import Dict
+from typing import Any, Dict, Optional
 
 import paramiko
 from paramiko.ssh_exception import SSHException
@@ -42,21 +46,28 @@ from paramiko.ssh_exception import SSHException
 
 class SftpConnection:
     """
-    Enterprise-grade SFTP connection manager with singleton pattern and automatic retry logic.
+    Enterprise-grade SFTP connection manager with singleton pattern and automatic
+    retry logic.
 
-    Provides secure, reliable SFTP connectivity for Spark data processing workflows with
-    intelligent connection management, automatic retry mechanisms, and comprehensive error
-    handling. The singleton pattern ensures efficient resource utilization by maintaining
+    Provides secure, reliable SFTP connectivity for Spark data processing workflows
+    with
+    intelligent connection management, automatic retry mechanisms, and comprehensive
+    error
+    handling. The singleton pattern ensures efficient resource utilization by
+    maintaining
     one connection per unique server configuration across the application lifecycle.
 
     This class is specifically designed for production environments where reliability,
-    security, and resource efficiency are paramount. It handles transient network issues,
-    manages connection lifecycle, and provides comprehensive logging for operational monitoring.
+    security, and resource efficiency are paramount. It handles transient network
+    issues,
+    manages connection lifecycle, and provides comprehensive logging for operational
+    monitoring.
 
     Attributes:
         _instances: Class-level dictionary maintaining singleton instances keyed by
                    unique connection parameters (host, port, username, application).
-                   Ensures efficient resource utilization and prevents connection proliferation.
+                   Ensures efficient resource utilization and prevents connection
+                   proliferation.
     """
 
     _instances: Dict[str, "SftpConnection"] = {}
@@ -64,13 +75,19 @@ class SftpConnection:
     # ------------------------------------------------------------------ #
     # Singleton : 1 instance par (spark app, host, port, username)
     # ------------------------------------------------------------------ #
-    def __new__(cls, spark, config: Dict[str, str], logger=None):
+    def __new__(
+        cls, spark: Any, config: Dict[str, Any], logger: Optional[logging.Logger] = None
+    ) -> "SftpConnection":
         """
-        Create or retrieve SFTP connection instance using singleton pattern for resource efficiency.
+        Create or retrieve SFTP connection instance using singleton pattern for
+        resource efficiency.
 
-        Implements sophisticated singleton logic based on unique connection parameters to ensure
-        optimal resource utilization while maintaining connection isolation between different
-        server configurations. This approach prevents connection proliferation and enables
+        Implements sophisticated singleton logic based on unique connection parameters
+        to ensure
+        optimal resource utilization while maintaining connection isolation between
+        different
+        server configurations. This approach prevents connection proliferation and
+        enables
         efficient reuse of established connections across multiple operations.
 
         Args:
@@ -92,7 +109,7 @@ class SftpConnection:
         """
         unique = (
             f"{spark.sparkContext.applicationId}:"
-            f"{config['host']}:{config.get('port',22)}:{config.get('username')}"
+            f"{config['host']}:{config.get('port', 22)}:{config.get('username')}"
         )
         key = hashlib.sha256(unique.encode()).hexdigest()
 
@@ -104,9 +121,12 @@ class SftpConnection:
     # ------------------------------------------------------------------ #
     # Init
     # ------------------------------------------------------------------ #
-    def _init(self, spark, config: Dict[str, str], logger):
+    def _init(
+        self, spark: Any, config: Dict[str, Any], logger: Optional[logging.Logger]
+    ) -> None:
         """
-        Initialize SFTP connection instance with configuration and establish connection.
+        Initialize SFTP connection instance with configuration and establish
+        connection.
 
         Performs comprehensive initialization including configuration validation,
         parameter setup, and immediate connection establishment with retry logic.
@@ -122,14 +142,26 @@ class SftpConnection:
         self.logger = logger
 
         self.host = config["host"]
-        self.port = config.get("port", 22)
+        # Preserve exact values from config, handling None appropriately
+        if "port" in config:
+            self.port = config["port"]
+        else:
+            self.port = 22
         self.username = config.get("username")
         self.password = config.get("password")
         self.key_file = config.get("key_file")
-        self.timeout = config.get("timeout", 10)
-
-        self.retries = config.get("retries", 3)
-        self.backoff_factor = config.get("backoff_factor", 0.5)
+        if "timeout" in config:
+            self.timeout = config["timeout"]
+        else:
+            self.timeout = 10
+        if "retries" in config:
+            self.retries = config["retries"]
+        else:
+            self.retries = 3
+        if "backoff_factor" in config:
+            self.backoff_factor = config["backoff_factor"]
+        else:
+            self.backoff_factor = 0.5
 
         # Connexion immédiate
         self._connect()
@@ -137,12 +169,76 @@ class SftpConnection:
     # ------------------------------------------------------------------ #
     # Connexion / reconnexion interne
     # ------------------------------------------------------------------ #
-    def _connect(self):
+    def _prepare_connection_params(self) -> Dict[str, Any]:
+        """
+        Prepare and validate connection parameters for paramiko SSH client.
+
+        Returns:
+            Dictionary with validated connection parameters
+        """
+        return {
+            "hostname": str(self.host),
+            "port": int(self.port) if self.port is not None else 22,
+            "username": str(self.username) if self.username is not None else None,
+            "password": str(self.password) if self.password is not None else None,
+            "key_filename": str(self.key_file) if self.key_file is not None else None,
+            "timeout": float(self.timeout) if self.timeout is not None else 10.0,
+        }
+
+    def _establish_ssh_connection(self) -> None:
+        """
+        Create SSH client and establish connection with validated parameters.
+        """
+        self._ssh = paramiko.SSHClient()
+        self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        connection_params = self._prepare_connection_params()
+        self._ssh.connect(**connection_params)
+        self._sftp = self._ssh.open_sftp()
+
+    def _log_connection_success(self) -> None:
+        """
+        Log successful SFTP connection establishment.
+        """
+        if self.logger:
+            self.logger.info(f"SFTP connecté à {self.username}@{self.host}:{self.port}")
+
+    def _handle_connection_failure(self, retry: int, error: Exception) -> bool:
+        """
+        Handle connection failure with retry logic and logging.
+
+        Args:
+            retry: Current retry attempt number
+            error: Exception that caused the failure
+
+        Returns:
+            True if should retry, False if should raise exception
+        """
+        max_retries = int(self.retries) if self.retries is not None else 3
+        if retry > max_retries:
+            if self.logger:
+                self.logger.error(f"Échec connexion SFTP : {error}")
+            return False
+
+        backoff = float(self.backoff_factor) if self.backoff_factor is not None else 0.5
+        sleep_time = backoff * (2 ** (retry - 1))
+
+        if self.logger:
+            self.logger.warning(
+                f"Connexion SFTP échouée (tentative {retry}/{max_retries}) "
+                f"– retry dans {sleep_time}s"
+            )
+
+        time.sleep(sleep_time)
+        return True
+
+    def _connect(self) -> None:
         """
         Establish SFTP connection with automatic retry logic and exponential backoff.
 
         Implements robust connection establishment with comprehensive error handling,
-        exponential backoff retry strategy, and detailed logging for operational monitoring.
+        exponential backoff retry strategy, and detailed logging for operational
+        monitoring.
         This method handles transient network issues gracefully while providing clear
         diagnostic information for persistent connection problems.
 
@@ -164,42 +260,26 @@ class SftpConnection:
         retry = 0
         while True:
             try:
-                self._ssh = paramiko.SSHClient()
-                self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                self._ssh.connect(
-                    hostname=self.host,
-                    port=self.port,
-                    username=self.username,
-                    password=self.password,
-                    key_filename=self.key_file,
-                    timeout=self.timeout,
-                )
-                self._sftp = self._ssh.open_sftp()
-                self.logger.info(
-                    f"SFTP connecté à {self.username}@{self.host}:{self.port}"
-                )
+                self._establish_ssh_connection()
+                self._log_connection_success()
                 return
             except (SSHException, OSError) as e:
                 retry += 1
-                if retry > self.retries:
-                    self.logger.error(f"Échec connexion SFTP : {e}")
+                if not self._handle_connection_failure(retry, e):
                     raise
-                sleep = self.backoff_factor * (2 ** (retry - 1))
-                self.logger.warning(
-                    f"Connexion SFTP échouée (tentative {retry}/{self.retries}) – retry dans {sleep}s"
-                )
-                time.sleep(sleep)
 
     # ------------------------------------------------------------------ #
     # Public API
     # ------------------------------------------------------------------ #
-    def get(self, remote_path: str, local_path: str, overwrite: bool = True):
+    def get(self, remote_path: str, local_path: str, overwrite: bool = True) -> None:
         """
-        Download file from remote SFTP server to local filesystem with overwrite control.
+        Download file from remote SFTP server to local filesystem with overwrite
+        control.
 
         Provides secure file download capabilities with configurable overwrite behavior
         for ETL workflows, data ingestion pipelines, and automated file processing.
-        Essential for retrieving data files, configuration updates, and processed results
+        Essential for retrieving data files, configuration updates, and processed
+        results
         from remote systems in distributed data processing environments.
 
         Args:
@@ -220,15 +300,19 @@ class SftpConnection:
 
             Conditional download to avoid re-processing:
 
-             sftp.get("/reports/monthly.xlsx", "./reports/current.xlsx", overwrite=False)
+             sftp.get(
+                 "/reports/monthly.xlsx", "./reports/current.xlsx", overwrite=False
+             )
         """
         if not overwrite and os.path.exists(local_path):
-            self.logger.info(f"Skip existing: {local_path}")
+            if self.logger:
+                self.logger.info(f"Skip existing: {local_path}")
             return
-        self.logger.info(f"SFTP GET {remote_path} -> {local_path}")
+        if self.logger:
+            self.logger.info(f"SFTP GET {remote_path} -> {local_path}")
         self._sftp.get(remote_path, local_path)
 
-    def put(self, local_path: str, remote_path: str, mkdir: bool = True):
+    def put(self, local_path: str, remote_path: str, mkdir: bool = True) -> None:
         """
         Upload local file to remote SFTP server with automatic directory creation.
 
@@ -251,13 +335,18 @@ class SftpConnection:
         Examples:
             Upload processed results:
 
-             sftp.put("./output/analysis_results.parquet", "/shared/results/daily.parquet")
+             sftp.put(
+                 "./output/analysis_results.parquet", "/shared/results/daily.parquet"
+             )
 
             Upload to existing directory structure:
 
-             sftp.put("./reports/summary.pdf", "/reports/2024/summary.pdf", mkdir=False)
+             sftp.put(
+                 "./reports/summary.pdf", "/reports/2024/summary.pdf", mkdir=False
+             )
         """
-        self.logger.info(f"SFTP PUT {local_path} -> {remote_path}")
+        if self.logger:
+            self.logger.info(f"SFTP PUT {local_path} -> {remote_path}")
         if mkdir:
             self._mkdir_remote(os.path.dirname(remote_path))
         self._sftp.put(local_path, remote_path)
@@ -265,7 +354,7 @@ class SftpConnection:
     # ------------------------------------------------------------------ #
     # Helpers
     # ------------------------------------------------------------------ #
-    def _mkdir_remote(self, remote_dir: str):
+    def _mkdir_remote(self, remote_dir: str) -> None:
         """
         Create remote directory structure recursively with intelligent path handling.
 
@@ -302,7 +391,7 @@ class SftpConnection:
     # ------------------------------------------------------------------ #
     # Fermeture
     # ------------------------------------------------------------------ #
-    def close(self):
+    def close(self) -> None:
         """
         Gracefully close SFTP and SSH connections with comprehensive error handling.
 
@@ -333,5 +422,7 @@ class SftpConnection:
             if hasattr(self, "_ssh") and self._ssh:
                 self._ssh.close()
         except (OSError, SSHException, AttributeError) as e:
-            self.logger.warning(f"Error during SFTP connection cleanup: {e}")
-        self.logger.info("SFTP session closed successfully")
+            if self.logger:
+                self.logger.warning(f"Error during SFTP connection cleanup: {e}")
+        if self.logger:
+            self.logger.info("SFTP session closed successfully")

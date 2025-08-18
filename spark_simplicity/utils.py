@@ -3,7 +3,7 @@ Spark Simplicity - Utility Functions
 ====================================
 
 Utility functions for DataFrame optimization and analysis.
-This module provides helpful functions for DataFrame manipulation and performance tuning.
+This module provides helpful functions for DataFrame manipulation and tuning.
 
 Key Features:
     - DataFrame analysis and profiling
@@ -18,7 +18,7 @@ Usage:
      optimized_df = optimize_dataframe(df)
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
@@ -51,7 +51,9 @@ def clean_nulls_and_empty(
     Example:
          df_clean = clean_nulls_and_empty(df, "Non renseigné")
          df_clean = clean_nulls_and_empty(df, "N/A", ["nom", "ville"])
-         df_clean = clean_nulls_and_empty(df, "Vide", null_values=["undefined", "missing"])
+         df_clean = clean_nulls_and_empty(
+             df, "Vide", null_values=["undefined", "missing"]
+         )
     """
     try:
         # Default null values to replace
@@ -81,11 +83,15 @@ def clean_nulls_and_empty(
             return df
 
         # Step 1: Replace NULL values
-        fill_dict = dict.fromkeys(target_columns, replacement_value)
+        fill_dict: Dict[str, Union[str, int, float, bool]] = dict.fromkeys(
+            target_columns, replacement_value
+        )
         df_clean = df.fillna(fill_dict)
 
         # Step 2: Replace empty strings and NaN-like values
-        df_clean = df_clean.replace(all_null_values, replacement_value)
+        # Use sequence for covariant typing
+        null_values_seq: Sequence[Union[str, int, float, bool]] = all_null_values
+        df_clean = df_clean.replace(list(null_values_seq), replacement_value)
 
         _utils_logger.info(
             "🧹 Cleaned NULL/empty values in %d columns: %s",
@@ -126,7 +132,7 @@ def analyze_data_quality(
         row_count = analysis_df.count()
         columns = analysis_df.columns
 
-        quality_metrics = {
+        quality_metrics: Dict[str, Any] = {
             "row_count": row_count,
             "column_count": len(columns),
             "completeness": {},  # Percentage of non-null values per column

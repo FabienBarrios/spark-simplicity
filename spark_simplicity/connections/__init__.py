@@ -3,19 +3,25 @@ Spark Simplicity - Enterprise Connection Management Package
 ==========================================================
 
 Comprehensive enterprise connection management suite providing secure, high-performance
-connectivity to external systems for Spark data processing workflows. This package delivers
+connectivity to external systems for Spark data processing workflows. This package
+delivers
 production-ready connection managers with singleton patterns, automatic retry logic, and
 comprehensive error handling for seamless integration with corporate infrastructure.
 
 **Supported Connection Types:**
-    - **Database Connectivity**: Enterprise JDBC connections with SQL Server optimization
-    - **SFTP File Transfer**: Secure file transfer with automatic retry and directory management
-    - **REST API Integration**: HTTP/HTTPS API connectivity with intelligent retry strategies
-    - **Email Communication**: SMTP email delivery with SSL/TLS encryption and bulk capabilities
+    - **Database Connectivity**: Enterprise JDBC connections with SQL Server
+      optimization
+    - **SFTP File Transfer**: Secure file transfer with automatic retry and directory
+      management
+    - **REST API Integration**: HTTP/HTTPS API connectivity with intelligent retry
+      strategies
+    - **Email Communication**: SMTP email delivery with SSL/TLS encryption and bulk
+      capabilities
 
 **Core Connection Managers:**
     **Database Connections** (``JdbcSqlServerConnection``):
-    - **SQL Server Optimization**: Specialized JDBC configuration for Microsoft SQL Server
+    - **SQL Server Optimization**: Specialized JDBC configuration for Microsoft
+      SQL Server
     - **Connection Pooling**: Singleton pattern with efficient resource management
     - **Query Performance**: Optimized fetch sizes and configurable query partitioning
     - **Security Features**: Encrypted connections with certificate validation
@@ -26,10 +32,12 @@ comprehensive error handling for seamless integration with corporate infrastruct
     - **Automatic Retry**: Exponential backoff for transient network issues
     - **Directory Management**: Automatic directory creation and file system operations
     - **Connection Reuse**: Singleton pattern for efficient resource utilization
-    - **Production Safety**: Comprehensive error handling and connection lifecycle management
+    - **Production Safety**: Comprehensive error handling and connection lifecycle
+      management
 
     **REST API Connections** (``RestApiConnection``):
-    - **HTTP Method Support**: Complete REST API method coverage (GET, POST, PUT, PATCH, DELETE)
+    - **HTTP Method Support**: Complete REST API method coverage (GET, POST, PUT,
+      PATCH, DELETE)
     - **Intelligent Retry**: Configurable retry strategies with exponential backoff
     - **Session Management**: Persistent HTTP sessions for optimal connection reuse
     - **Authentication**: Flexible authentication mechanisms (token, basic, custom)
@@ -52,9 +60,11 @@ comprehensive error handling for seamless integration with corporate infrastruct
 
     **Security & Compliance**:
     - **Encrypted Connections**: SSL/TLS encryption for all network communication
-    - **Certificate Validation**: Configurable certificate verification for enterprise security
+    - **Certificate Validation**: Configurable certificate verification for
+      enterprise security
     - **Credential Protection**: Secure handling of authentication credentials
-    - **Enterprise Standards**: Compliance with corporate security policies and standards
+    - **Enterprise Standards**: Compliance with corporate security policies and
+      standards
     - **Audit Logging**: Comprehensive logging for operational monitoring and compliance
 
     **Performance Optimization**:
@@ -169,7 +179,9 @@ comprehensive error handling for seamless integration with corporate infrastruct
     ...
     ... except Exception as e:
     ...     logger.error(f"Workflow execution failed: {e}")
-    ...     email_sender.send_simple_email(admin_email, 'ALERT: Processing Failed', str(e))
+    ...     email_sender.send_simple_email(
+    ...         admin_email, 'ALERT: Processing Failed', str(e)
+    ...     )
     ...     raise
 
 **Performance Considerations:**
@@ -182,7 +194,8 @@ comprehensive error handling for seamless integration with corporate infrastruct
 **Security Best Practices:**
     **Credential Management**: Never hard-code credentials; use secure configuration
     **Network Security**: Always use encrypted connections in production environments
-    **Certificate Validation**: Enable certificate verification for production deployments
+    **Certificate Validation**: Enable certificate verification for production
+    deployments
     **Access Control**: Implement proper authentication and authorization controls
     **Audit Logging**: Monitor all connection activities for security compliance
 
@@ -202,7 +215,8 @@ See Also:
 
 Note:
     This connections package provides the foundation for all external system integration
-    in Spark Simplicity, with each connection manager optimized for its specific protocol
+    in Spark Simplicity, with each connection manager optimized for its specific
+    protocol
     while maintaining consistent interfaces and enterprise-grade reliability suitable
     for both development and production environments.
 """

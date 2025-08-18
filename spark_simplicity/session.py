@@ -121,7 +121,7 @@ class SparkConfig:
                     # Reduce Hadoop-related operations that cause issues on Windows
                     CONF_CATALOG_IMPL: "in-memory",
                     # File system configurations for Windows
-                    CONF_ARROW_ENABLED: "false",  # Disable Arrow on Windows to avoid issues
+                    CONF_ARROW_ENABLED: "false",  # Disable Arrow on Windows
                     # Reduce verbosity of Hadoop warnings
                     "spark.hadoop.io.native.lib.available": "false",
                 }
@@ -308,14 +308,14 @@ def _get_config_for_environment(environment: Environment) -> Dict[str, str]:
 
 
 def _configure_builder(
-    builder,
+    builder: SparkSession.Builder,
     base_config: Dict[str, str],
     master: Optional[str],
     environment: Environment,
     enable_hive_support: bool,
     checkpoint_dir: Optional[str],
     warehouse_dir: Optional[str],
-):
+) -> SparkSession.Builder:
     """Configure SparkSession builder with all options."""
     # Set master if provided
     if master:
@@ -345,8 +345,11 @@ def _configure_builder(
 
 
 def _log_session_creation(
-    spark, app_name: str, environment: Environment, base_config: Dict[str, str]
-):
+    spark: SparkSession,
+    app_name: str,
+    environment: Environment,
+    base_config: Dict[str, str],
+) -> None:
     """Log session creation details with Windows-safe fallback."""
     try:
         _session_logger.info("Spark session created: %s", app_name)
@@ -466,7 +469,9 @@ def get_spark_session(
 
 
 def get_or_create_spark_session(
-    app_name: str, environment: Union[str, Environment] = Environment.LOCAL, **kwargs
+    app_name: str,
+    environment: Union[str, Environment] = Environment.LOCAL,
+    **kwargs: Any,
 ) -> SparkSession:
     """
     Get existing Spark session or create new one if none exists.

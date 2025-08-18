@@ -2,13 +2,17 @@
 Spark Simplicity - Email Connection Manager
 ==========================================
 
-Enterprise-grade email communication service with secure SMTP connectivity, SSL/TLS encryption,
-and comprehensive message formatting capabilities. This module provides reliable email delivery
-for Spark data processing workflows, enabling automated notifications, report distribution,
+Enterprise-grade email communication service with secure SMTP connectivity, SSL/TLS
+encryption,
+and comprehensive message formatting capabilities. This module provides reliable email
+delivery
+for Spark data processing workflows, enabling automated notifications, report
+distribution,
 and operational monitoring through secure email channels.
 
 Key Features:
-    - **Secure SMTP Connectivity**: SSL/TLS encryption with configurable security protocols
+    - **Secure SMTP Connectivity**: SSL/TLS encryption with configurable security
+      protocols
     - **Multiple Message Formats**: Plain text, HTML, and attachment support
     - **Bulk Email Processing**: Mass email campaigns with personalization capabilities
     - **Production Safety**: Comprehensive error handling and security validation
@@ -42,15 +46,19 @@ Message Format Support:
     - Comprehensive delivery status tracking and error reporting
 
 Enterprise Integration:
-    - **Corporate Email Systems**: Compatible with Exchange, Gmail, Outlook, and custom SMTP
-    - **Notification Workflows**: Integration with data processing pipelines and alerting
+    - **Corporate Email Systems**: Compatible with Exchange, Gmail, Outlook, and
+      custom SMTP
+    - **Notification Workflows**: Integration with data processing pipelines and
+      alerting
     - **Report Distribution**: Automated delivery of analytics reports and dashboards
     - **Operational Monitoring**: System status notifications and error alerting
-    - **Compliance Support**: Secure email delivery meeting enterprise security requirements
+    - **Compliance Support**: Secure email delivery meeting enterprise security
+      requirements
 
 Usage:
     This module is designed for enterprise data processing scenarios requiring
-    reliable email communication integrated with Spark workflows and operational monitoring.
+    reliable email communication integrated with Spark workflows and operational
+    monitoring.
 
     from spark_simplicity.connections.email_connection import EmailSender
 """
@@ -63,23 +71,32 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Any, Dict, List
 
 
 class EmailSender:
     """
-    Enterprise-grade email sender with secure SMTP connectivity and comprehensive message support.
+    Enterprise-grade email sender with secure SMTP connectivity and comprehensive
+    message support.
 
-    Provides reliable email delivery capabilities for Spark data processing workflows with
-    secure SSL/TLS encryption, multiple message formats, and production-ready error handling.
-    This class is designed for enterprise environments requiring secure, automated email
+    Provides reliable email delivery capabilities for Spark data processing workflows
+    with
+    secure SSL/TLS encryption, multiple message formats, and production-ready error
+    handling.
+    This class is designed for enterprise environments requiring secure, automated
+    email
     communication for notifications, reporting, and operational monitoring.
 
     Key Capabilities:
-        - **Secure SMTP**: SSL/TLS encrypted connections with configurable security levels
-        - **Message Formats**: Plain text, HTML, and attachment support for diverse use cases
-        - **Bulk Processing**: Mass email capabilities with personalization and templating
+        - **Secure SMTP**: SSL/TLS encrypted connections with configurable security
+          levels
+        - **Message Formats**: Plain text, HTML, and attachment support for diverse
+          use cases
+        - **Bulk Processing**: Mass email capabilities with personalization and
+          templating
         - **Error Handling**: Comprehensive exception management and delivery tracking
-        - **Enterprise Ready**: Compatible with corporate email systems and security policies
+        - **Enterprise Ready**: Compatible with corporate email systems and security
+          policies
         - **Authentication**: Flexible authentication supporting passwords and tokens
 
     Security Features:
@@ -101,7 +118,8 @@ class EmailSender:
         """
         Initialize secure email sender with SMTP configuration and security settings.
 
-        Configures enterprise-grade email connectivity with comprehensive security options,
+        Configures enterprise-grade email connectivity with comprehensive security
+        options,
         authentication setup, and protocol selection for reliable email delivery in
         production environments. This initialization establishes secure communication
         channels while maintaining flexibility for various SMTP server configurations.
@@ -122,7 +140,8 @@ class EmailSender:
                   Used for both authentication and 'From' field in sent messages.
             password: Authentication credential for SMTP server access:
                      - Account password for basic authentication
-                     - Application-specific password (recommended for enhanced security)
+                     - Application-specific password (recommended for enhanced
+                       security)
                      - None for servers not requiring authentication (rare)
                      - Authentication tokens for advanced enterprise setups
             use_ssl: Boolean flag controlling connection encryption protocol:
@@ -132,7 +151,8 @@ class EmailSender:
             verify_ssl: Boolean flag for SSL certificate validation:
                        - True (default): Strict certificate validation (recommended)
                        - False: Disable validation (only for testing/debugging)
-                       Certificate verification ensures connection security and authenticity.
+                       Certificate verification ensures connection security and
+                       authenticity.
         """
         self.smtp_server = smtp_server
         self.port = port
@@ -142,18 +162,18 @@ class EmailSender:
         self.verify_ssl = verify_ssl
         self.logger = EmailSender._setup_logger()
 
-        # Security parameter validation
         if not verify_ssl:
             self.logger.warning("WARNING: SSL verification disabled - security risk!")
 
     @staticmethod
-    def _setup_logger():
+    def _setup_logger() -> logging.Logger:
         """
         Configure dedicated logger for email operations with structured formatting.
 
         Creates and configures a specialized logger for email module operations with
         appropriate formatting, log levels, and handler setup. This logger provides
-        comprehensive tracking of email operations, security events, and error conditions
+        comprehensive tracking of email operations, security events, and error
+        conditions
         for operational monitoring and debugging purposes.
 
         Returns:
@@ -184,8 +204,6 @@ class EmailSender:
         Returns:
             ssl.SSLContext: Securely configured SSL context with TLS 1.2+ enforcement
         """
-        # Use default context with recommended security parameters
-        # ssl.create_default_context() automatically disables insecure protocols
         context = ssl.create_default_context()
 
         # Default secure configuration (recommended)
@@ -209,7 +227,7 @@ class EmailSender:
         return context
 
     @staticmethod
-    def _normalize_email_list(emails: str | list[str]) -> list[str]:
+    def _normalize_email_list(emails: Any) -> List[str]:
         """
         Normalize email address input into standardized list format with validation.
 
@@ -217,36 +235,43 @@ class EmailSender:
         of email addresses for consistent processing across all email methods.
 
         Args:
-            emails: Email addresses in string or list format
+            emails: Email addresses in string, list format, None, or any other type
+                   (gracefully handles invalid types by returning empty list)
 
         Returns:
             List of cleaned email address strings
         """
-        if isinstance(emails, str):
+        if emails is None:
+            return []
+        elif isinstance(emails, str):
             return [email.strip() for email in emails.split(",") if email.strip()]
         elif isinstance(emails, list):
             return [email.strip() for email in emails if email.strip()]
         else:
+            # Handle invalid types gracefully by returning empty list
             return []
 
     def send_simple_email(
         self,
-        to_email: str | list[str],
+        to_email: str | List[str],
         subject: str,
         message: str,
-        cc: str | list[str] | None = None,
-        bcc: str | list[str] | None = None,
+        cc: str | List[str] | None = None,
+        bcc: str | List[str] | None = None,
     ) -> bool:
         """
-        Send plain text email with comprehensive recipient management and error handling.
+        Send plain text email with comprehensive recipient management and error
+        handling.
 
-        Provides reliable plain text email delivery with support for multiple recipients,
+        Provides reliable plain text email delivery with support for multiple
+        recipients,
         carbon copy (CC), and blind carbon copy (BCC) functionality. This method is
         optimized for system notifications, alerts, and simple message delivery in
         production data processing workflows.
 
         Args:
-            to_email: Primary recipient email addresses (single, list, or comma-separated)
+            to_email: Primary recipient email addresses (single, list, or
+                     comma-separated)
             subject: Email subject line for message identification
             message: Plain text message body content
             cc: Carbon copy recipients (optional)
@@ -268,7 +293,6 @@ class EmailSender:
             if cc_emails:
                 msg["Cc"] = ", ".join(cc_emails)
 
-            # BCC not added to headers to remain hidden
             all_recipients = to_emails + cc_emails + bcc_emails
 
             return self._send_email(msg, all_recipients)
@@ -279,15 +303,16 @@ class EmailSender:
 
     def send_html_email(
         self,
-        to_email: str | list[str],
+        to_email: str | List[str],
         subject: str,
         html_content: str,
         text_content: str | None = None,
-        cc: str | list[str] | None = None,
-        bcc: str | list[str] | None = None,
+        cc: str | List[str] | None = None,
+        bcc: str | List[str] | None = None,
     ) -> bool:
         """
-        Send rich HTML email with optional plain text alternative for enhanced presentation.
+        Send rich HTML email with optional plain text alternative for enhanced
+        presentation.
 
         Delivers professionally formatted HTML email messages with optional plain text
         fallback for maximum client compatibility. This method is ideal for reports,
@@ -318,12 +343,10 @@ class EmailSender:
             if cc_emails:
                 msg["Cc"] = ", ".join(cc_emails)
 
-            # Add text version if provided
             if text_content:
                 text_part = MIMEText(text_content)
                 msg.attach(text_part)
 
-            # Add HTML version
             html_part = MIMEText(html_content, "html")
             msg.attach(html_part)
 
@@ -337,12 +360,12 @@ class EmailSender:
 
     def send_email_with_attachments(
         self,
-        to_emails: str | list[str],
+        to_emails: str | List[str],
         subject: str,
         message: str,
-        attachments: list[str],
-        cc: str | list[str] | None = None,
-        bcc: str | list[str] | None = None,
+        attachments: List[str],
+        cc: str | List[str] | None = None,
+        bcc: str | List[str] | None = None,
     ) -> bool:
         """
         Send email with file attachments for report distribution and data sharing.
@@ -376,10 +399,8 @@ class EmailSender:
             if cc_list:
                 msg["Cc"] = ", ".join(cc_list)
 
-            # Add message body
             msg.attach(MIMEText(message))
 
-            # Add file attachments
             for file_path in attachments:
                 if os.path.isfile(file_path):
                     EmailSender._attach_file(msg, file_path)
@@ -396,38 +417,41 @@ class EmailSender:
 
     def send_bulk_email(
         self,
-        recipients: list[dict],
+        recipients: List[Dict[str, Any]],
         subject: str,
         message_template: str,
-        cc: str | list[str] | None = None,
-        bcc: str | list[str] | None = None,
-    ) -> dict:
+        cc: str | List[str] | None = None,
+        bcc: str | List[str] | None = None,
+    ) -> Dict[str, Any]:
         """
-        Send personalized bulk email campaigns with template processing and delivery tracking.
+        Send personalized bulk email campaigns with template processing and delivery
+        tracking.
 
-        Executes mass email distribution with personalized content generation, comprehensive
+        Executes mass email distribution with personalized content generation,
+        comprehensive
         error handling, and detailed delivery tracking. This method is designed for
-        automated notifications, report distribution, and customer communication workflows
-        requiring personalized content at scale while maintaining professional delivery standards.
+        automated notifications, report distribution, and customer communication
+        workflows
+        requiring personalized content at scale while maintaining professional delivery
+        standards.
 
         Args:
             recipients: List of recipient dictionaries containing personalization data
             subject: Common subject line for all bulk email messages
-            message_template: Message template with placeholder variables for personalization
+            message_template: Message template with placeholder variables for
+                             personalization
             cc: Global carbon copy addresses applied to all emails (optional)
             bcc: Global blind carbon copy addresses for all emails (optional)
 
         Returns:
             Dictionary with comprehensive delivery tracking results
         """
-        results = {"success": 0, "failed": 0, "errors": []}
+        results: Dict[str, Any] = {"success": 0, "failed": 0, "errors": []}
 
         for recipient in recipients:
             try:
-                # Personalize message content
                 personalized_message = message_template.format(**recipient)
 
-                # CC/BCC can be personalized per recipient or global
                 recipient_cc = recipient.get("cc", cc)
                 recipient_bcc = recipient.get("bcc", bcc)
 
@@ -446,7 +470,10 @@ class EmailSender:
 
             except KeyError as e:
                 results["failed"] += 1
-                error_msg = f"Missing variable {e} for {recipient.get('email', 'unknown email')}"
+                error_msg = (
+                    f"Missing variable {e} for "
+                    f"{recipient.get('email', 'unknown email')}"
+                )
                 results["errors"].append(error_msg)
                 self.logger.error(error_msg)
             except Exception as e:
@@ -458,7 +485,7 @@ class EmailSender:
         return results
 
     @staticmethod
-    def _attach_file(msg: MIMEMultipart, file_path: str):
+    def _attach_file(msg: MIMEMultipart, file_path: str) -> None:
         """
         Attach file to email message with proper MIME encoding and headers.
 
@@ -482,9 +509,10 @@ class EmailSender:
 
         msg.attach(part)
 
-    def _send_email(self, msg: MIMEText | MIMEMultipart, to_emails: list[str]) -> bool:
+    def _send_email(self, msg: MIMEText | MIMEMultipart, to_emails: List[str]) -> bool:
         """
-        Send email via SMTP with enterprise-grade secure connection and comprehensive error handling.
+        Send email via SMTP with enterprise-grade secure connection and comprehensive
+        error handling.
 
         Executes the core email delivery process with hardened SSL/TLS encryption,
         robust authentication, and comprehensive error handling. This method provides
@@ -499,34 +527,23 @@ class EmailSender:
             Boolean indicating SMTP delivery operation status (True for success)
         """
         try:
-            # Create secure SSL context
             context = self._create_secure_context()
 
             if self.use_ssl:
-                # Direct SSL/TLS connection (port 465)
                 with smtplib.SMTP_SSL(
                     self.smtp_server, self.port, context=context
                 ) as server:
-                    # Authentication only if password provided
                     if self.password:
                         server.login(self.email, self.password)
 
-                    # Send email to all recipients (TO, CC, BCC)
                     server.send_message(msg, to_addrs=to_emails)
             else:
-                # STARTTLS connection (port 587)
                 with smtplib.SMTP(self.smtp_server, self.port) as server:
-                    # Enable debug mode if needed (for development)
-                    # server.set_debuglevel(1)
-
-                    # Start TLS with secure context
                     server.starttls(context=context)
 
-                    # Authentication only if password provided
                     if self.password:
                         server.login(self.email, self.password)
 
-                    # Send email to all recipients (TO, CC, BCC)
                     server.send_message(msg, to_addrs=to_emails)
 
             self.logger.info(

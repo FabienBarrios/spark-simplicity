@@ -22,11 +22,13 @@ Key Features:
     - Extensive error handling and logging
 """
 
+import os
+
 __version__ = "1.0.0"
 __author__ = "F. Barrios"
 __email__ = "fabienbarrios@gmail.com"
 __license__ = "MIT"
-__description__ = "Simplify Apache Spark operations with an intuitive Python " "API"
+__description__ = "Simplify Apache Spark operations with an intuitive Python API"
 
 from .connections.database_connection import JdbcSqlServerConnection
 
@@ -93,7 +95,7 @@ __all__ = [
 ]
 
 
-def _check_pyspark_version():
+def _check_pyspark_version() -> None:
     """Check if PySpark is available and meets minimum version requirements"""
     try:
         import pyspark
@@ -121,33 +123,29 @@ def _check_pyspark_version():
         raise
 
 
-def _check_dependencies():
+def _check_dependencies() -> None:
     """Check all required dependencies are available"""
     _check_pyspark_version()
 
-    try:
-        import openpyxl
-        import pandas
-        import paramiko
-        import requests
-    except ImportError as e:
-        missing_package = str(e).split("'")[1] if "'" in str(e) else "unknown"
-        raise ImportError(
-            f"Required dependency '{missing_package}' is not installed. "
-            f"Install it with: pip install {missing_package}"
-        ) from e
+    import importlib
+
+    required_packages = ["openpyxl", "pandas", "paramiko", "requests"]
+
+    for package in required_packages:
+        try:
+            importlib.import_module(package)
+        except ImportError as e:
+            raise ImportError(
+                f"Required dependency '{package}' is not installed. "
+                f"Install it with: pip install {package}"
+            ) from e
 
 
 # Perform dependency checks on import
 _check_dependencies()
 
-# Optional: Show version information (can be disabled with environment
-# variable)
-import os
-
+# Optional: Show version information (can be disabled with environment variable)
 if os.getenv("SPARK_SIMPLICITY_VERBOSE", "").lower() in ("1", "true", "yes"):
-    from .logger import get_logger
-
     _init_logger = get_logger("spark_simplicity.init")
     _init_logger.info("Spark Simplicity %s loaded successfully!", __version__)
     _init_logger.info("   %d functions available", len(__all__))
