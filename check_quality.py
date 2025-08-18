@@ -9,7 +9,7 @@ Used in CI/CD pipelines and pre-commit hooks.
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple, NamedTuple
+from typing import List, NamedTuple
 
 
 class CheckResult(NamedTuple):

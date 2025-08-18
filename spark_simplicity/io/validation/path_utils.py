@@ -2,9 +2,12 @@
 Spark Simplicity - Path Validation Utilities
 ============================================
 
-Comprehensive path validation and management utilities for secure and reliable I/O operations.
-This module provides production-grade path validation, permission checking, and mount point
-management capabilities essential for enterprise data processing workflows. Ensures robust
+Comprehensive path validation and management utilities for secure and reliable I/O
+operations.
+This module provides production-grade path validation, permission checking, and mount
+point
+management capabilities essential for enterprise data processing workflows. Ensures
+robust
 file system operations across different platforms and storage systems.
 
 Key Features:
@@ -18,7 +21,8 @@ Key Features:
 Path Security:
     - **Access Control**: Validates file and directory permissions before operations
     - **Mount Validation**: Ensures shared storage accessibility across cluster nodes
-    - **Privilege Validation**: Checks current process permissions against required operations
+    - **Privilege Validation**: Checks current process permissions against required
+      operations
     - **Cluster Verification**: Validates path accessibility on all Spark executors
 
 Enterprise Features:
@@ -126,7 +130,8 @@ def _check_path_access(path: Path, path_type: str = "path") -> Tuple[bool, str]:
         path: Path object to validate for accessibility. Can represent files,
               directories, or mount points depending on the path_type parameter.
         path_type: Descriptive type identifier used in error messages for context.
-                  Common values: "path", "mount point", "input file", "output directory".
+                  Common values: "path", "mount point", "input file", "output
+                  directory".
                   This helps provide specific error messages for different use cases.
 
     Returns:
@@ -197,31 +202,46 @@ def configure_spark_path(
     file_path: Path, shared_mount: bool, spark: SparkSession
 ) -> str:
     """
-    Configure optimal Spark path format with cluster-wide validation for reliable distributed I/O operations.
+    Configure optimal Spark path format with cluster-wide validation for reliable
+    distributed I/O operations.
 
-    Determines the appropriate path format for Spark I/O operations based on storage type and validates
-    accessibility across all cluster nodes. This function ensures that file paths work correctly in
-    distributed Spark environments by choosing between direct path access for shared storage and
+    Determines the appropriate path format for Spark I/O operations based on storage
+    type and validates
+    accessibility across all cluster nodes. This function ensures that file paths work
+    correctly in
+    distributed Spark environments by choosing between direct path access for shared
+    storage and
     file URI schemes for local files, while performing comprehensive cluster validation.
 
     Path Configuration Strategy:
-        - **Shared Mount Storage**: Uses direct path format for cluster-accessible storage systems
-          like NFS, HDFS, or shared network drives. Performs cluster-wide validation to ensure
+        - **Shared Mount Storage**: Uses direct path format for cluster-accessible
+          storage systems
+          like NFS, HDFS, or shared network drives. Performs cluster-wide validation to
+          ensure
           all executor nodes can access the path before proceeding with I/O operations.
 
-        - **Local File Storage**: Uses file:// URI scheme for local-only files that exist on
-          individual nodes. Appropriate for single-node Spark deployments or when files are
+        - **Local File Storage**: Uses file:// URI scheme for local-only files that
+          exist on
+          individual nodes. Appropriate for single-node Spark deployments or when files
+          are
           replicated to all nodes independently.
 
     Args:
-        file_path: Path object representing the target file or directory location. Can point
+        file_path: Path object representing the target file or directory location. Can
+                  point
                   to input files for reading or output locations for writing operations.
-                  The path format is automatically configured based on the shared_mount parameter.
-        shared_mount: Boolean flag indicating whether the file path resides on shared storage
-                     accessible by all cluster nodes. True triggers cluster-wide validation
-                     to ensure distributed accessibility. False uses local file URI scheme.
-        spark: Active SparkSession instance used for cluster validation operations. The session
-              is used to test path accessibility across all executor nodes when shared_mount=True.
+                  The path format is automatically configured based on the shared_mount
+                  parameter.
+        shared_mount: Boolean flag indicating whether the file path resides on shared
+                     storage
+                     accessible by all cluster nodes. True triggers cluster-wide
+                     validation
+                     to ensure distributed accessibility. False uses local file URI
+                     scheme.
+        spark: Active SparkSession instance used for cluster validation operations. The
+              session
+              is used to test path accessibility across all executor nodes when
+              shared_mount=True.
 
     Returns:
         Properly formatted path string optimized for Spark I/O operations:
@@ -229,16 +249,21 @@ def configure_spark_path(
         - For local files: File URI scheme (e.g., "file:///home/user/local/file.csv")
 
     Raises:
-        RuntimeError: If shared mount validation fails, indicating the path is not accessible
-                     on all cluster nodes. The error provides detailed troubleshooting guidance
-                     including specific actions required to resolve cluster accessibility issues.
-                     Common causes include unmounted storage, permission problems, or network
+        RuntimeError: If shared mount validation fails, indicating the path is not
+                     accessible
+                     on all cluster nodes. The error provides detailed troubleshooting
+                     guidance
+                     including specific actions required to resolve cluster
+                     accessibility issues.
+                     Common causes include unmounted storage, permission problems, or
+                     network
                      connectivity issues between cluster nodes.
 
     Cluster Validation Process:
         When shared_mount=True, performs comprehensive validation:
         1. **Path Existence**: Verifies the path exists on the driver node
-        2. **Mount Point Detection**: Identifies shared storage mount points automatically
+        2. **Mount Point Detection**: Identifies shared storage mount points
+           automatically
         3. **Executor Testing**: Tests path accessibility from all Spark executor nodes
         4. **Permission Validation**: Confirms read/write permissions across the cluster
         5. **Network Connectivity**: Validates network filesystem accessibility
@@ -246,7 +271,8 @@ def configure_spark_path(
     Performance Considerations:
         - **Shared Mount Validation**: Involves network communication with all executors
         - **Validation Caching**: Results should be cached for repeated path operations
-        - **Network Latency**: Mount point validation may have network filesystem latency
+        - **Network Latency**: Mount point validation may have network filesystem
+          latency
         - **Cluster Size**: Validation time scales with number of executor nodes
 
     Examples:

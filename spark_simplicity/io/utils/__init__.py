@@ -2,14 +2,18 @@
 Spark Simplicity - I/O Utilities Package
 ========================================
 
-Comprehensive utility library for advanced I/O operations, file system management, and format
-processing in enterprise Spark environments. This package provides essential tools for file
-analysis, format conversion, data transformation, and file system operations optimized for
+Comprehensive utility library for advanced I/O operations, file system management,
+and format
+processing in enterprise Spark environments. This package provides essential tools
+for file
+analysis, format conversion, data transformation, and file system operations
+optimized for
 production data processing workflows.
 
 **Core Utility Categories:**
     - **File System Utilities**: Advanced file metadata analysis and path operations
-    - **Format Processing**: Intelligent format detection, conversion, and parsing utilities
+    - **Format Processing**: Intelligent format detection, conversion, and parsing
+      utilities
     - **Data Transformation**: Format-specific data processing and conversion tools
     - **Error Recovery**: Robust error handling and data recovery mechanisms
     - **Performance Optimization**: Efficient algorithms for large-scale file operations
@@ -180,7 +184,8 @@ production data processing workflows.
 See Also:
     - Main I/O package: ``spark_simplicity.io`` for core reading/writing operations
     - Writers package: ``spark_simplicity.io.writers`` for format-specific output
-    - Validation package: ``spark_simplicity.io.validation`` for path and mount validation
+    - Validation package: ``spark_simplicity.io.validation`` for path and mount
+      validation
     - Session management: ``spark_simplicity.session`` for Spark cluster configuration
 
 Note:
@@ -191,6 +196,15 @@ Note:
 """
 
 from .file_utils import get_file_info
-from .format_utils import *
+from .format_utils import (
+    JsonParser,
+    convert_jsonl_to_json_array,
+    process_and_move_json_files,
+)
 
-__all__ = ["get_file_info"]
+__all__ = [
+    "get_file_info",
+    "convert_jsonl_to_json_array",
+    "process_and_move_json_files",
+    "JsonParser",
+]

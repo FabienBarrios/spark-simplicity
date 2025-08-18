@@ -43,7 +43,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 import pandas as pd
 from pyspark.sql import DataFrame
@@ -61,17 +61,20 @@ def write_excel(
     header: bool = True,
     index: bool = False,
     max_rows: int = 1_000_000,
-    **pandas_options,
+    **pandas_options: Any,
 ) -> None:
     """
-    Export Spark DataFrame to professional Excel format with enterprise-grade safety controls.
+    Export Spark DataFrame to professional Excel format with enterprise-grade safety
+    controls.
 
-    Provides high-quality Excel export functionality using pandas and openpyxl for maximum
+    Provides high-quality Excel export functionality using pandas and openpyxl for
+    maximum
     compatibility with Microsoft Excel and other spreadsheet applications. This function
     automatically handles data conversion, validation, and formatting while maintaining
     professional standards for business reporting and data analysis.
 
-    This operation requires collecting the entire DataFrame to the driver node for pandas
+    This operation requires collecting the entire DataFrame to the driver node for
+    pandas
     conversion, making it optimal for moderate-sized datasets typically used in business
     reporting scenarios. For large-scale data processing, consider using CSV or Parquet
     formats which support distributed processing.
@@ -84,7 +87,8 @@ def write_excel(
                     Excel 2007+ format compatibility. Parent directories will be created
                     automatically if they don't exist.
         sheet_name: Name of the Excel worksheet where data will be written. Must comply
-                   with Excel naming restrictions (no special characters like /, \\, *, etc.).
+                   with Excel naming restrictions (no special characters like /, \\, *,
+                   etc.).
                    Maximum 31 characters. Defaults to 'Sheet1'.
         header: Whether to include column headers in the first row of the worksheet.
                True creates professional headers using DataFrame column names.
@@ -183,7 +187,8 @@ def write_excel(
         - **Complex Types**: Serialized to string representation
 
     See Also:
-        - CSV export: ``write_csv()`` for large datasets and cross-platform compatibility
+        - CSV export: ``write_csv()`` for large datasets and cross-platform
+          compatibility
         - Parquet export: ``write_parquet()`` for analytics and big data workflows
         - JSON export: ``write_json()`` for API integration and data exchange
         - Multiple sheets: Use pandas ExcelWriter directly for advanced Excel features
@@ -203,12 +208,13 @@ def write_excel(
 
     try:
         # Convert to Pandas (required for Excel)
-        pandas_df = df.toPandas()
+        pandas_df: pd.DataFrame = df.toPandas()
 
         # Check row count for safety
         if len(pandas_df) > max_rows:
             raise ValueError(
-                f"DataFrame has {len(pandas_df):,} rows, exceeding Excel limit of {max_rows:,}. "
+                f"DataFrame has {len(pandas_df):,} rows, exceeding Excel limit of "
+                f"{max_rows:,}. "
                 f"Consider using write_csv() or filtering the data first."
             )
 
@@ -236,6 +242,7 @@ def write_excel(
 
     except Exception as e:
         raise RuntimeError(
-            f"Could not save the file (please verify the path, write permissions, and available "
+            f"Could not save the file (please verify the path, write permissions, and "
+            f"available "
             f"disk space) : Excel {output_path}: {str(e)}"
         ) from e

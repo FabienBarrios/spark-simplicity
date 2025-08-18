@@ -9,7 +9,8 @@ integrations. Optimized for production environments with robust error handling.
 
 Key Features:
     - **Plain Text Reading**: Line-by-line text file ingestion into Spark DataFrames
-    - **Positional File Support**: Fixed-width file parsing with precise column specifications
+    - **Positional File Support**: Fixed-width file parsing with precise column
+      specifications
     - **Encoding Intelligence**: Automatic encoding detection and fallback mechanisms
     - **Data Cleaning**: Intelligent whitespace handling and null value processing
     - **Legacy Integration**: Mainframe and legacy system file format compatibility
@@ -56,7 +57,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import pandas as pd
 from pyspark.sql import DataFrame, SparkSession
@@ -72,27 +73,41 @@ def load_text(
     spark: SparkSession, file_path: Union[str, Path], shared_mount: bool = False
 ) -> DataFrame:
     """
-    Load plain text file into Spark DataFrame with line-by-line processing and cluster validation.
+    Load plain text file into Spark DataFrame with line-by-line processing and
+    cluster validation.
 
-    Provides enterprise-grade text file ingestion for unstructured data processing workflows.
-    Each line of the input file becomes a row in the resulting DataFrame with a single 'value'
-    column, making it ideal for log processing, configuration file analysis, and unstructured
+    Provides enterprise-grade text file ingestion for unstructured data processing
+    workflows.
+    Each line of the input file becomes a row in the resulting DataFrame with a
+    single 'value'
+    column, making it ideal for log processing, configuration file analysis, and
+    unstructured
     text analytics. Includes comprehensive path validation for distributed environments.
 
-    This function leverages Spark's native text reading capabilities while adding production-grade
-    error handling, path validation, and cluster compatibility checks essential for enterprise
+    This function leverages Spark's native text reading capabilities while adding
+    production-grade
+    error handling, path validation, and cluster compatibility checks essential for
+    enterprise
     data processing environments.
 
     Args:
-        spark: Active SparkSession instance for DataFrame creation and cluster operations.
-              Must be properly configured with appropriate executors for distributed processing.
+        spark: Active SparkSession instance for DataFrame creation and cluster
+              operations.
+              Must be properly configured with appropriate executors for distributed
+              processing.
               Used for both file reading and cluster validation operations.
-        file_path: Path to the plain text file to load. Can be provided as string or Path object.
-                  Supports absolute and relative paths with automatic resolution. Compatible
-                  with local filesystems, network attached storage, and mounted cloud storage.
-        shared_mount: Boolean indicating whether the file resides on shared storage accessible
-                     by all cluster nodes. When True, triggers cluster-wide validation to ensure
-                     all executors can access the file. When False, uses local file URI scheme.
+        file_path: Path to the plain text file to load. Can be provided as string or
+                  Path object.
+                  Supports absolute and relative paths with automatic resolution.
+                  Compatible
+                  with local filesystems, network attached storage, and mounted cloud
+                  storage.
+        shared_mount: Boolean indicating whether the file resides on shared storage
+                     accessible
+                     by all cluster nodes. When True, triggers cluster-wide validation
+                     to ensure
+                     all executors can access the file. When False, uses local file URI
+                     scheme.
 
     Returns:
         Spark DataFrame with single 'value' column containing the text content:
@@ -214,19 +229,22 @@ def _read_fwf_with_encoding_fallback(
     names: List[str],
     primary_encoding: str,
     strip_whitespace: bool,
-    **pandas_options,
+    **pandas_options: Any,
 ) -> Tuple[pd.DataFrame, str]:
     """
     Read fixed-width file with intelligent encoding detection and fallback recovery.
 
-    Provides robust file reading for fixed-width formats with automatic encoding detection
-    when the primary encoding fails. This function implements a cascading fallback strategy
+    Provides robust file reading for fixed-width formats with automatic encoding
+    detection
+    when the primary encoding fails. This function implements a cascading fallback
+    strategy
     through common encodings to maximize data recovery from files with unknown or mixed
     encoding scenarios, particularly common in legacy system integrations.
 
     Args:
         file_path: Path to the fixed-width file to read
-        colspecs: List of (start_position, end_position) tuples defining column boundaries
+        colspecs: List of (start_position, end_position) tuples defining column
+                 boundaries
         names: List of column names corresponding to the column specifications
         primary_encoding: Preferred encoding to attempt first (e.g., 'utf-8', 'cp1252')
         strip_whitespace: Whether to strip leading/trailing whitespace from fields
@@ -279,14 +297,14 @@ def _clean_string_columns(pandas_df: pd.DataFrame) -> pd.DataFrame:
         DataFrame with cleaned string columns and standardized null handling
     """
 
-    def clean_string_value(x):
+    def clean_string_value(x: Any) -> Optional[str]:
         """Strip whitespace from string values, preserve NaN as None."""
         if pd.isna(x):
             return None
         elif isinstance(x, str):
             return x.strip()
         else:
-            return x
+            return str(x)
 
     for col in pandas_df.columns:
         if pandas_df[col].dtype == "object":
@@ -301,14 +319,18 @@ def load_positional(
     column_specs: List[Tuple[str, int, int]],
     strip_whitespace: bool = True,
     encoding: str = "utf-8",
-    **pandas_options,
+    **pandas_options: Any,
 ) -> DataFrame:
     """
-    Load fixed-width positional file into Spark DataFrame with enterprise-grade parsing and validation.
+    Load fixed-width positional file into Spark DataFrame with enterprise-grade
+    parsing and validation.
 
-    Provides specialized processing for fixed-width positional files commonly used in mainframe
-    systems, legacy applications, and structured data exports. This function combines pandas'
-    fixed-width parsing capabilities with Spark's distributed processing power, including
+    Provides specialized processing for fixed-width positional files commonly used in
+    mainframe
+    systems, legacy applications, and structured data exports. This function combines
+    pandas'
+    fixed-width parsing capabilities with Spark's distributed processing power,
+    including
     intelligent encoding detection, data cleaning, and comprehensive error handling.
 
     The function is essential for integrating with legacy systems that export data in
@@ -316,15 +338,22 @@ def load_positional(
     Common in financial systems, government data, and mainframe extracts.
 
     Args:
-        spark: Active SparkSession instance for DataFrame creation and distributed processing.
-              Must be properly configured for the expected data volume and cluster resources.
-              Used for converting cleaned pandas DataFrame to distributed Spark DataFrame.
-        file_path: Path to the fixed-width positional file. Can be string or Path object.
+        spark: Active SparkSession instance for DataFrame creation and distributed
+              processing.
+              Must be properly configured for the expected data volume and cluster
+              resources.
+              Used for converting cleaned pandas DataFrame to distributed Spark
+              DataFrame.
+        file_path: Path to the fixed-width positional file. Can be string or Path
+                  object.
                   Supports absolute and relative paths with automatic resolution.
                   Compatible with local storage, network mounts, and shared filesystems.
-        column_specs: List of column specification tuples in format (column_name, start_pos, end_pos).
-                     Each tuple defines a field with its name and exact character positions.
-                     Positions are zero-indexed and end_pos is exclusive (Python slice notation).
+        column_specs: List of column specification tuples in format
+                     (column_name, start_pos, end_pos).
+                     Each tuple defines a field with its name and exact character
+                     positions.
+                     Positions are zero-indexed and end_pos is exclusive (Python slice
+                     notation).
                      Must not be empty and should cover all required fields in the file.
         strip_whitespace: Whether to automatically strip leading and trailing whitespace
                          from string fields. Recommended for fixed-width files that pad
@@ -333,8 +362,10 @@ def load_positional(
                  'utf-8' for modern files, 'cp1252' for Windows systems, 'iso-8859-1'
                  for European data. Automatic fallback is attempted if primary fails.
         **pandas_options: Additional parameters passed directly to pandas.read_fwf().
-                         Common options include 'skiprows', 'nrows', 'dtype', 'na_values'.
-                         Allows fine-tuning of parsing behavior for specific file formats.
+                         Common options include 'skiprows', 'nrows', 'dtype',
+                         'na_values'.
+                         Allows fine-tuning of parsing behavior for specific file
+                         formats.
 
     Returns:
         Spark DataFrame with columns as specified in column_specs:

@@ -2,10 +2,11 @@
 Spark Simplicity - Base Reader Utilities
 ========================================
 
-Foundation utilities and common functions for all Spark DataFrame readers providing shared
-validation, error handling, and data quality assurance capabilities. This module contains
-core infrastructure used by all format-specific readers to ensure consistent behavior,
-robust error handling, and comprehensive data validation across different file formats.
+Foundation utilities and common functions for all Spark DataFrame readers providing
+shared validation, error handling, and data quality assurance capabilities. This module
+contains core infrastructure used by all format-specific readers to ensure consistent
+behavior, robust error handling, and comprehensive data validation across different file
+formats.
 
 Key Features:
     - **Data Validation**: Comprehensive DataFrame structure and content validation
@@ -67,16 +68,20 @@ _reader_logger = get_logger("spark_simplicity.io.readers")
 
 def _validate_json_dataframe(df: DataFrame) -> bool:
     """
-    Validate DataFrame integrity with comprehensive corruption detection for JSON processing.
+    Validate DataFrame integrity with comprehensive corruption detection for JSON
+    processing.
 
     Provides robust validation of DataFrame structure and content specifically designed
     for JSON data processing workflows. This function performs sophisticated analysis
     to detect corrupt records, validate schema integrity, and ensure data quality
     standards required for production data processing environments.
 
-    The validation process is optimized to avoid triggering Spark's QUERY_ONLY_CORRUPT_RECORD_COLUMN
-    error while providing comprehensive assessment of data quality and structural integrity.
-    Essential for ensuring reliable data processing in enterprise JSON ingestion workflows.
+    The validation process is optimized to avoid triggering Spark's
+    QUERY_ONLY_CORRUPT_RECORD_COLUMN
+    error while providing comprehensive assessment of data quality and structural
+    integrity.
+    Essential for ensuring reliable data processing in enterprise JSON ingestion
+    workflows.
 
     Args:
         df: Spark DataFrame to validate for structural integrity and data quality.
@@ -110,7 +115,8 @@ def _validate_json_dataframe(df: DataFrame) -> bool:
         - Ensures minimum requirements for data processing operations
 
     Error Handling Strategy:
-        **DataFrame Validation Errors**: Wrapped in DataFrameValidationError with context
+        **DataFrame Validation Errors**: Wrapped in DataFrameValidationError with
+          context
         **Corrupt Data Errors**: Re-raised as-is to preserve error semantics
         **Unexpected Errors**: Logged and wrapped with detailed diagnostic information
         **Spark Query Errors**: Avoided through intelligent validation approach
@@ -161,7 +167,8 @@ def _validate_json_dataframe(df: DataFrame) -> bool:
 
     Performance Considerations:
         **Validation Overhead**: Minimal - only metadata inspection, no data scanning
-        **Spark Query Avoidance**: Intelligent approach prevents expensive query operations
+        **Spark Query Avoidance**: Intelligent approach prevents expensive query
+        operations
         **Error Prevention**: Avoids triggering Spark's corrupt record column errors
         **Production Efficiency**: Optimized for high-throughput validation scenarios
 
@@ -183,8 +190,10 @@ def _validate_json_dataframe(df: DataFrame) -> bool:
 
     Diagnostic Information:
         **Validation Context**: Detailed error information in DataFrameValidationError
-        **Function Traceability**: Error context includes validation function identification
-        **Debugging Support**: Comprehensive logging for troubleshooting validation issues
+        **Function Traceability**: Error context includes validation function
+        identification
+        **Debugging Support**: Comprehensive logging for troubleshooting validation
+        issues
         **Audit Trail**: Validation results logged for operational monitoring
 
     See Also:
@@ -200,18 +209,12 @@ def _validate_json_dataframe(df: DataFrame) -> bool:
         optimization for high-throughput scenarios.
     """
     try:
-        # Check if all records are corrupt (contains only _corrupt_record column)
         if "_corrupt_record" in df.columns and len(df.columns) == 1:
             return False
 
-        # Check if there are corrupt records mixed with valid data
         if "_corrupt_record" in df.columns:
-            # If we have other columns besides _corrupt_record, we likely have valid data
-            # Avoid the QUERY_ONLY_CORRUPT_RECORD_COLUMN error by not doing any operations
             return len(df.columns) > 1
 
-        # No corrupt record column means the DataFrame is likely valid
-        # Just check if it has any columns (structure validation)
         return len(df.columns) > 0
 
     except (AttributeError, ValueError) as e:
@@ -221,7 +224,6 @@ def _validate_json_dataframe(df: DataFrame) -> bool:
             details={"error": str(e), "function": "_validate_json_dataframe"},
         )
     except CorruptDataError:
-        # Re-raise CorruptDataError as-is
         raise
     except Exception as e:
         _reader_logger.error(f"Unexpected error during DataFrame validation: {e}")

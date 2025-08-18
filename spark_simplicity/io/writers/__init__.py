@@ -8,38 +8,51 @@ This package provides enterprise-grade export capabilities supporting multiple o
 strategies optimized for different use cases and data processing scenarios.
 
 **Supported Output Formats:**
-    - **CSV**: Comma-separated values with full RFC 4180 compliance and international support
-    - **JSON**: JavaScript Object Notation with proper array formatting and pretty-print options
-    - **Parquet**: Apache Parquet columnar format with advanced compression and partitioning
-    - **Excel**: Microsoft Excel .xlsx format with professional formatting and business features
+    - **CSV**: Comma-separated values with full RFC 4180 compliance and international
+      support
+    - **JSON**: JavaScript Object Notation with proper array formatting and
+      pretty-print options
+    - **Parquet**: Apache Parquet columnar format with advanced compression and
+      partitioning
+    - **Excel**: Microsoft Excel .xlsx format with professional formatting and business
+      features
     - **Positional**: Fixed-width text files for mainframe and legacy system integration
 
 **Writing Strategies:**
     All format writers support multiple optimized strategies:
 
-    - **Coalesce Strategy**: Single output file via coalesce(1), optimal for ETL workflows
+    - **Coalesce Strategy**: Single output file via coalesce(1), optimal for ETL
+      workflows
       and data exchange scenarios where downstream systems expect single files.
 
-    - **Distributed Strategy**: Multiple output files preserving Spark's natural parallelism,
+    - **Distributed Strategy**: Multiple output files preserving Spark's natural
+      parallelism,
       optimal for big data scenarios and maximum write throughput.
 
     - **Pandas Strategy**: Single file via pandas conversion with advanced compatibility
       features and sophisticated append operations.
 
 **Key Features:**
-    - **Intelligent Fallback**: Automatic strategy selection based on available resources
-    - **Cross-Platform Support**: Windows, Linux, and macOS compatibility with native optimizations
-    - **International Support**: Full Unicode and regional formatting support for global deployments
-    - **Production Safety**: Comprehensive error handling, validation, and resource cleanup
-    - **Performance Optimization**: Memory-efficient processing with configurable resource limits
-    - **Shared Storage Support**: NFS, HDFS, and cloud storage compatibility for cluster environments
+    - **Intelligent Fallback**: Automatic strategy selection based on available
+      resources
+    - **Cross-Platform Support**: Windows, Linux, and macOS compatibility with native
+      optimizations
+    - **International Support**: Full Unicode and regional formatting support for
+      global deployments
+    - **Production Safety**: Comprehensive error handling, validation, and resource
+      cleanup
+    - **Performance Optimization**: Memory-efficient processing with configurable
+      resource limits
+    - **Shared Storage Support**: NFS, HDFS, and cloud storage compatibility for
+      cluster environments
 
 **Enterprise Features:**
     - **Atomic Operations**: File operations with rollback capability on failures
     - **Comprehensive Logging**: Detailed operation logging for monitoring and debugging
     - **Resource Management**: Automatic temporary file cleanup and memory management
     - **Format Validation**: Input validation and format compliance checking
-    - **Append Operations**: Intelligent data merging for incremental processing workflows
+    - **Append Operations**: Intelligent data merging for incremental processing
+      workflows
 
 **Usage Examples:**
 
@@ -70,8 +83,10 @@ strategies optimized for different use cases and data processing scenarios.
 
 **Performance Guidelines:**
     - **Small datasets (< 100MB)**: Use coalesce or pandas strategies
-    - **Medium datasets (100MB - 10GB)**: Choose strategy based on downstream requirements
-    - **Large datasets (> 10GB)**: Use distributed strategy with appropriate partitioning
+    - **Medium datasets (100MB - 10GB)**: Choose strategy based on downstream
+      requirements
+    - **Large datasets (> 10GB)**: Use distributed strategy with appropriate
+      partitioning
 
 **Format Selection Guide:**
     - **CSV**: Universal compatibility, data exchange, database imports

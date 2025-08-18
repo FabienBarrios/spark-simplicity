@@ -179,7 +179,8 @@ def write_positional(
                   - 'right': Right-align text with left padding (ideal for numbers)
                   - 'center': Center text with balanced left/right padding
         line_ending: Line terminator character sequence. Defaults to Unix-style '\\n'.
-                    Use '\\r\\n' for Windows compatibility or '\\r' for legacy Mac systems.
+                    Use '\\r\\n' for Windows compatibility or '\\r' for legacy Mac
+                    systems.
         encoding: Character encoding for the output file. Defaults to 'utf-8' for
                  Unicode support. Use 'ascii', 'latin-1', or 'cp1252' for legacy
                  system compatibility.
@@ -260,7 +261,7 @@ def write_positional(
 
         # Convert to pandas for positional formatting
         column_names = [spec[0] for spec in column_specs]
-        pandas_df = df.select(*column_names).toPandas()
+        pandas_df: pd.DataFrame = df.select(*column_names).toPandas()
 
         # Ensure parent directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)

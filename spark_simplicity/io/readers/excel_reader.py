@@ -3,15 +3,15 @@ Spark Simplicity - Excel File Reader
 ====================================
 
 Enterprise-grade Excel file reader for business data integration and report processing.
-This module provides comprehensive Excel ingestion capabilities using pandas as an intermediate
-processor, enabling seamless integration of business reports, financial data, and operational
-spreadsheets into Spark analytics workflows.
+This module provides comprehensive Excel ingestion capabilities using pandas as an
+intermediate processor, enabling seamless integration of business reports, financial
+data, and operational spreadsheets into Spark analytics workflows.
 
 Key Features:
     - **Business Data Integration**: Seamless processing of Excel business reports
     - **Multi-Sheet Support**: Automatic handling of workbooks with multiple sheets
     - **Flexible Header Processing**: Configurable header row detection and processing
-    - **Format Compatibility**: Support for Excel 2007+ (.xlsx) and legacy (.xls) formats
+    - **Format Compatibility**: Support for Excel 2007+ (.xlsx) and legacy (.xls)formats
     - **Pandas Integration**: Leverages pandas' robust Excel parsing capabilities
     - **Production Safety**: Comprehensive error handling and validation
 
@@ -72,7 +72,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 from pyspark.sql import DataFrame, SparkSession
@@ -88,30 +88,32 @@ def load_excel(
     file_path: Union[str, Path],
     sheet_name: Optional[str] = None,
     header: int = 0,
-    **pandas_options,
+    **pandas_options: Any,
 ) -> DataFrame:
     """
-    Load Excel files into Spark DataFrame with enterprise-grade business data processing.
+    Load Excel files into Spark DataFrame with enterprise-grade business data processing
 
-    Provides comprehensive Excel data ingestion for business intelligence, financial reporting,
-    and operational analytics workflows. This function leverages pandas' robust Excel parsing
-    capabilities while converting the result to distributed Spark DataFrames for scalable
-    analytics processing. Essential for integrating Excel-based business processes with
-    modern data analytics platforms.
+    Provides comprehensive Excel data ingestion for business intelligence, financial
+    reporting, and operational analytics workflows. This function leverages pandas'
+    robust Excel parsing capabilities while converting the result to distributed Spark
+    DataFrames for scalable analytics processing. Essential for integrating Excel-based
+    business processes with modern data analytics platforms.
 
-    The function is specifically designed for business environments where Excel remains a
-    primary tool for reporting, analysis, and data sharing across departments and stakeholders.
-    It bridges the gap between traditional Excel workflows and modern big data analytics.
+    The function is specifically designed for business environments where Excel remains
+    a primary tool for reporting, analysis, and data sharing across departments and
+    stakeholders. It bridges the gap between traditional Excel workflows and modern big
+    data analytics.
 
     Args:
-        spark: Active SparkSession instance for DataFrame creation and distributed processing.
-              Must be properly configured with adequate driver memory to handle Excel file
-              loading and pandas DataFrame conversion. Memory requirements depend on Excel
-              file size and complexity.
+        spark: Active SparkSession instance for DataFrame creation and distributed
+              processing. Must be properly configured with adequate driver memory to
+              handle Excel file loading and pandas DataFrame conversion. Memory
+              requirements depend on Excel file size and complexity.
         file_path: Path to Excel file (.xlsx, .xls, .xlsm, .xltx formats supported).
-                  Can be provided as string or Path object with automatic format detection.
-                  Supports absolute and relative paths with local filesystem access.
-                  Network paths and mapped drives are supported on Windows systems.
+                  Can be provided as string or Path object with automatic format
+                  detection.Supports absolute and relative paths with local filesystem
+                  access. Network paths and mapped drives are supported on Windows
+                  systems.
         sheet_name: Specific worksheet name to load from the Excel workbook:
                    - None (default): Loads and combines all sheets into single DataFrame
                    - String: Loads specific sheet by name (e.g., "Sales_Data")
@@ -143,17 +145,21 @@ def load_excel(
     Raises:
         FileNotFoundError: If the specified Excel file does not exist at the given path.
                           Error message includes full path for troubleshooting.
-        RuntimeError: If Excel loading fails due to format corruption, unsupported features,
-                     permission issues, memory constraints, or pandas processing errors.
-                     Includes detailed error context for business user troubleshooting.
+        RuntimeError: If Excel loading fails due to format corruption, unsupported
+                     features, permission issues, memory constraints, or pandas
+                     processing errors. Includes detailed error context for business
+                     user troubleshooting.
         MemoryError: If Excel file is too large to process on driver node. Consider
                     alternative formats or data preprocessing for very large files.
 
     Processing Characteristics:
         **Memory Usage**: Entire Excel file loaded into driver memory during processing
-        **Performance**: Single-threaded pandas processing followed by Spark distribution
-        **Sheet Handling**: Sequential processing of multiple sheets with schema alignment
-        **Data Type Preservation**: Excel formatting translated to appropriate Spark types
+        **Performance**: Single-threaded pandas processing followed by Spark
+        distribution
+        **Sheet Handling**: Sequential processing of multiple sheets with schema
+        alignment
+        **Data Type Preservation**: Excel formatting translated to appropriate Spark
+        types
 
     Examples:
         Load complete Excel workbook with all sheets:

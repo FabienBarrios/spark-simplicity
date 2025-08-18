@@ -28,21 +28,35 @@ class TestDatabaseConnectionProperties:
         JdbcSqlServerConnection._instances.clear()
 
     @given(
-        host=st.text(alphabet=string.ascii_letters + string.digits + ".-", min_size=1, max_size=50),
+        host=st.text(
+            alphabet=string.ascii_letters + string.digits + ".-",
+            min_size=1,
+            max_size=50,
+        ),
         database=st.text(
             alphabet=string.ascii_letters + string.digits + "_", min_size=1, max_size=30
         ),
-        user=st.text(alphabet=string.ascii_letters + string.digits + "_", min_size=1, max_size=20),
+        user=st.text(
+            alphabet=string.ascii_letters + string.digits + "_", min_size=1, max_size=20
+        ),
         password=st.text(min_size=1, max_size=50),
-        app_id=st.text(alphabet=string.ascii_letters + string.digits, min_size=1, max_size=20),
+        app_id=st.text(
+            alphabet=string.ascii_letters + string.digits, min_size=1, max_size=20
+        ),
     )
     @example(
-        host="localhost", database="testdb", user="testuser", password="testpass", app_id="test-app"
+        host="localhost",
+        database="testdb",
+        user="testuser",
+        password="testpass",
+        app_id="test-app",
     )
     def test_connection_creation_always_succeeds_with_valid_inputs(
         self, host, database, user, password, app_id
     ):
-        """Test that connection creation always succeeds with any valid string inputs."""
+        """
+        Test that connection creation always succeeds with any valid string inputs.
+        """
         # Filter out problematic inputs
         assume(not any(char in host for char in [" ", "\n", "\t", "\r"]))
         assume(not any(char in database for char in [" ", "\n", "\t", "\r", ";"]))
@@ -59,7 +73,12 @@ class TestDatabaseConnectionProperties:
         mock_spark.sparkContext.applicationId = app_id  # Use unique app_id
         mock_logger = Mock()
 
-        config = {"host": host, "database": database, "user": user, "password": password}
+        config = {
+            "host": host,
+            "database": database,
+            "user": user,
+            "password": password,
+        }
 
         # Should always succeed
         conn = JdbcSqlServerConnection(mock_spark, config, mock_logger)
@@ -96,7 +115,9 @@ class TestDatabaseConnectionProperties:
 
     @given(
         app_id=st.text(
-            alphabet=string.ascii_letters + string.digits + "-_", min_size=1, max_size=50
+            alphabet=string.ascii_letters + string.digits + "-_",
+            min_size=1,
+            max_size=50,
         )
     )
     def test_singleton_behavior_with_different_app_ids(self, app_id):
@@ -132,9 +153,15 @@ class DatabaseConnectionStateMachine(RuleBasedStateMachine):
         JdbcSqlServerConnection._instances.clear()
 
     @rule(
-        app_id=st.text(alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10),
-        host=st.text(alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10),
-        database=st.text(alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10),
+        app_id=st.text(
+            alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10
+        ),
+        host=st.text(
+            alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10
+        ),
+        database=st.text(
+            alphabet=string.ascii_letters + string.digits, min_size=1, max_size=10
+        ),
     )
     def create_connection(self, app_id, host, database):
         """Create a new database connection."""
@@ -143,7 +170,12 @@ class DatabaseConnectionStateMachine(RuleBasedStateMachine):
         mock_spark.sparkContext.applicationId = app_id
         mock_logger = Mock()
 
-        config = {"host": host, "database": database, "user": "testuser", "password": "testpass"}
+        config = {
+            "host": host,
+            "database": database,
+            "user": "testuser",
+            "password": "testpass",
+        }
 
         conn_key = f"{app_id}:{host}:{database}"
 

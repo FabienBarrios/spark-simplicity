@@ -3,22 +3,28 @@ Spark Simplicity - I/O Readers Package
 ======================================
 
 Comprehensive data ingestion library for enterprise-grade Spark DataFrame processing.
-This package provides high-performance, production-ready readers for all major data formats
-with intelligent format detection, automatic schema inference, and robust error handling.
-Optimized for diverse data sources, cross-system integration, and large-scale analytics workflows.
+This package provides high-performance, production-ready readers for all major data
+formats with intelligent format detection, automatic schema inference, and robust error
+handling. Optimized for diverse data sources, cross-system integration, and large-scale
+analytics workflows.
 
 **Supported Data Formats:**
-    - **CSV**: Comma-separated values with RFC 4180 compliance and flexible delimiter support
-    - **JSON**: JavaScript Object Notation with automatic format detection (JSONL, arrays, pretty)
-    - **Parquet**: Apache Parquet columnar format optimized for analytics and data lake processing
-    - **Excel**: Microsoft Excel (.xlsx/.xls) for business data integration and reporting workflows
+    - **CSV**: Comma-separated values with RFC 4180 compliance and flexible delimiter
+      support
+    - **JSON**: JavaScript Object Notation with automatic format detection
+      (JSONL, arrays, pretty)
+    - **Parquet**: Apache Parquet columnar format optimized for analytics and data lake
+      processing
+    - **Excel**: Microsoft Excel (.xlsx/.xls) for business data integration and
+      reporting workflows
     - **Text**: Plain text files for log processing and unstructured data analysis
     - **Positional**: Fixed-width files for mainframe and legacy system integration
 
 **Core Reader Capabilities:**
     **Performance Optimization:**
     - Distributed processing across Spark cluster for maximum throughput
-    - Intelligent schema inference with configurable precision and performance trade-offs
+    - Intelligent schema inference with configurable precision and performance
+      trade-offs
     - Predicate pushdown optimization for selective data loading (Parquet, CSV)
     - Memory-efficient processing with streaming support for large datasets
     - Automatic partitioning and load balancing across cluster resources
@@ -31,7 +37,8 @@ Optimized for diverse data sources, cross-system integration, and large-scale an
 
     **Production Safety:**
     - Comprehensive error handling with detailed diagnostic information
-    - Cluster-wide validation for shared storage accessibility in distributed environments
+    - Cluster-wide validation for shared storage accessibility in distributed
+      environments
     - Data quality validation and corruption detection with automated recovery
     - Resource management and cleanup for reliable production operation
 
@@ -184,16 +191,20 @@ Optimized for diverse data sources, cross-system integration, and large-scale an
     **Cross-System Integration**: Format-agnostic processing for diverse data sources
 
 See Also:
-    - Writers package: ``spark_simplicity.io.writers`` for complementary output capabilities
-    - Validation package: ``spark_simplicity.io.validation`` for path and mount validation
-    - Utilities package: ``spark_simplicity.io.utils`` for format conversion and processing
+    - Writers package: ``spark_simplicity.io.writers`` for complementary output
+      capabilities
+    - Validation package: ``spark_simplicity.io.validation`` for path and mount
+      validation
+    - Utilities package: ``spark_simplicity.io.utils`` for format conversion and
+      processing
     - Session management: ``spark_simplicity.session`` for optimized Spark configuration
 
 Note:
-    This readers package provides the foundation for all data ingestion in Spark Simplicity,
-    with each reader optimized for its specific format while maintaining consistent interfaces
-    and enterprise-grade reliability. The intelligent defaults and comprehensive error handling
-    make it suitable for both development and production environments.
+    This readers package provides the foundation for all data ingestion in Spark
+    Simplicity, with each reader optimized for its specific format while maintaining
+    consistent interfaces and enterprise-grade reliability. The intelligent defaults and
+    comprehensive error handling make it suitable for both development and production
+    environments.
 """
 
 from .csv_reader import load_csv

@@ -8,7 +8,7 @@ Follows pytest best practices for fixture sharing and test isolation.
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Dict
 from unittest.mock import Mock
 
 import pytest
@@ -30,12 +30,12 @@ def mock_spark_session():
     mock_context = Mock()
     mock_context.applicationId = "test-application-id"
     mock_spark.sparkContext = mock_context
-    
+
     # Mock common SparkSession methods
     mock_spark.read = Mock()
     mock_spark.createDataFrame = Mock()
     mock_spark.sql = Mock()
-    
+
     return mock_spark
 
 
@@ -53,7 +53,7 @@ def sample_database_config() -> Dict[str, str]:
         "port": "1433",
         "database": "test_database",
         "user": "test_user",
-        "password": "test_password"
+        "password": "test_password",
     }
 
 
@@ -64,7 +64,7 @@ def minimal_database_config() -> Dict[str, str]:
         "host": "test-host",
         "database": "test_db",
         "user": "user",
-        "password": "pass"
+        "password": "pass",
     }
 
 
@@ -73,7 +73,9 @@ def pytest_configure(config):
     """Configure pytest with custom settings."""
     # Add custom markers programmatically if needed
     config.addinivalue_line("markers", "database: Tests requiring database connection")
-    config.addinivalue_line("markers", "spark_required: Tests requiring real Spark session")
+    config.addinivalue_line(
+        "markers", "spark_required: Tests requiring real Spark session"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -82,7 +84,7 @@ def pytest_collection_modifyitems(config, items):
         # Auto-mark database tests
         if "database" in str(item.fspath).lower():
             item.add_marker(pytest.mark.database)
-            
+
         # Auto-mark slow tests based on naming
         if "performance" in item.name or "stress" in item.name:
             item.add_marker(pytest.mark.slow)
@@ -92,14 +94,25 @@ def pytest_collection_modifyitems(config, items):
 DATABASE_TEST_CONFIGS = [
     pytest.param(
         {"host": "localhost", "database": "db1", "user": "user1", "password": "pass1"},
-        id="basic-config"
+        id="basic-config",
     ),
     pytest.param(
-        {"host": "server.com", "port": "1434", "database": "db2", "user": "user2", "password": "pass2"},
-        id="custom-port"
+        {
+            "host": "server.com",
+            "port": "1434",
+            "database": "db2",
+            "user": "user2",
+            "password": "pass2",
+        },
+        id="custom-port",
     ),
     pytest.param(
-        {"host": "192.168.1.100", "database": "prod_db", "user": "prod_user", "password": "prod_pass"},
-        id="production-like"
+        {
+            "host": "192.168.1.100",
+            "database": "prod_db",
+            "user": "prod_user",
+            "password": "prod_pass",
+        },
+        id="production-like",
     ),
 ]

@@ -9,8 +9,6 @@ import threading
 import time
 from unittest.mock import Mock
 
-import pytest
-
 from spark_simplicity.connections.database_connection import JdbcSqlServerConnection
 
 
@@ -174,8 +172,6 @@ class TestSecurityValidation:
 
     def test_concurrent_connection_creation_thread_safety(self):
         """Test thread safety of singleton pattern under concurrent access."""
-        import threading
-        import time
 
         mock_spark = Mock()
         mock_spark.sparkContext.applicationId = "thread-safety-test"
@@ -193,8 +189,8 @@ class TestSecurityValidation:
         def create_connection():
             """Create connection in thread."""
             time.sleep(0.001)  # Small delay to increase chance of race condition
-            conn = JdbcSqlServerConnection(mock_spark, config, mock_logger)
-            connections.append(conn)
+            connec = JdbcSqlServerConnection(mock_spark, config, mock_logger)
+            connections.append(connec)
 
         # Create multiple threads
         threads = []

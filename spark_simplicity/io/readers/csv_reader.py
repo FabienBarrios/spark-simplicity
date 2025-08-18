@@ -2,13 +2,15 @@
 Spark Simplicity - CSV File Reader
 ==================================
 
-High-performance CSV file reader with intelligent defaults and comprehensive format support.
-This module provides enterprise-grade CSV ingestion capabilities optimized for production
-data processing workflows, ETL pipelines, and cross-system data integration. Designed to
-handle diverse CSV formats with robust error handling and automatic schema detection.
+High-performance CSV file reader with intelligent defaults and comprehensive format
+support. This module provides enterprise-grade CSV ingestion capabilities optimized for
+production data processing workflows, ETL pipelines, and cross-system data integration.
+Designed to handle diverse CSV formats with robust error handling and automatic schema
+detection.
 
 Key Features:
-    - **Intelligent Defaults**: Pre-configured options optimized for common CSV scenarios
+    - **Intelligent Defaults**: Pre-configured options optimized for common CSV
+      scenarios
     - **Universal Format Support**: RFC 4180 compliance with flexible delimiter handling
     - **Schema Intelligence**: Automatic data type inference with configurable precision
     - **International Support**: Full UTF-8 and multi-encoding compatibility
@@ -58,7 +60,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from pyspark.sql import DataFrame, SparkSession
 
@@ -81,16 +83,16 @@ def load_csv(
     escape: str = '"',
     null_value: str = "",
     shared_mount: bool = False,
-    **options,
+    **options: Any,
 ) -> DataFrame:
     """
     Load CSV files with enterprise-grade performance and intelligent format detection.
 
     Provides comprehensive CSV data ingestion optimized for production data processing
-    workflows, ETL pipelines, and cross-system integration. This function combines Spark's
-    high-performance CSV processing with intelligent defaults and extensive customization
-    options, making it suitable for both simple data loading and complex enterprise
-    data integration scenarios.
+    workflows, ETL pipelines, and cross-system integration. This function combines Spark
+    high-performance CSV processing with intelligent defaults and extensive
+    customization options, making it suitable for both simple data loading and complex
+    enterprise data integration scenarios.
 
     The function is designed to handle the full spectrum of CSV formats encountered in
     enterprise environments, from standard RFC 4180 compliant files to specialized
@@ -98,12 +100,14 @@ def load_csv(
 
     Args:
         spark: Active SparkSession instance configured for distributed CSV processing.
-              Must have appropriate executor resources allocated for the expected data volume
-              and complexity. Used for DataFrame creation, schema inference, and cluster validation.
-        file_path: Path to CSV file for loading. Can be provided as string or Path object
-                  with automatic format detection. Supports absolute and relative paths
-                  with compatibility for local storage, network mounts, HDFS, and cloud storage.
-                  File extension verification is recommended but not enforced.
+              Must have appropriate executor resources allocated for the expected data
+              volume and complexity. Used for DataFrame creation, schema inference,
+              and cluster validation.
+        file_path: Path to CSV file for loading. Can be provided as string or Path
+                  object with automatic format detection. Supports absolute and relative
+                  paths with compatibility for local storage, network mounts, HDFS,
+                  and cloud storage. File extension verification is recommended but not
+                  enforced.
         header: Whether the first row contains column headers:
                - True (default): Use first row as column names with automatic cleanup
                - False: Generate default column names (_c0, _c1, etc.)
@@ -111,7 +115,8 @@ def load_csv(
         infer_schema: Whether to automatically detect and assign appropriate data types:
                      - True (default): Analyze data to infer optimal types (recommended)
                      - False: Treat all columns as strings for maximum compatibility
-                     Schema inference improves query performance but requires data scanning.
+                     Schema inference improves query performance but requires data
+                     scanning.
         sep: Field delimiter character separating values in each record:
             - ',' (default): Standard comma-separated values
             - ';': European standard for locales using comma as decimal separator
@@ -119,7 +124,8 @@ def load_csv(
             - '|': Pipe-delimited for specialized data formats
             - Custom single characters for proprietary formats
         encoding: Character encoding for proper international text handling:
-                 - 'UTF-8' (default): Universal encoding supporting international characters
+                 - 'UTF-8' (default): Universal encoding supporting international
+                    characters
                  - 'latin-1': Western European character set for legacy systems
                  - 'cp1252': Windows encoding for Microsoft system compatibility
                  - 'ascii': Basic ASCII encoding for maximum system compatibility
@@ -142,12 +148,15 @@ def load_csv(
                    - Custom null indicators for specialized data sources
         shared_mount: Boolean indicating shared storage accessibility:
                      - False (default): Local file access with file:// URI scheme
-                     - True: Shared storage accessible by all cluster nodes with validation
-                     Triggers comprehensive cluster validation for distributed environments.
+                     - True: Shared storage accessible by all cluster nodes with
+                       validation
+                     Triggers comprehensive cluster validation for distributed
+                     environments.
         **options: Advanced Spark DataFrameReader options for specialized requirements:
                   - 'timestampFormat': Custom timestamp parsing pattern
                   - 'dateFormat': Custom date parsing pattern
-                  - 'mode': Error handling mode ('PERMISSIVE', 'DROPMALFORMED', 'FAILFAST')
+                  - 'mode': Error handling mode
+                    ('PERMISSIVE', 'DROPMALFORMED', 'FAILFAST')
                   - 'columnNameOfCorruptRecord': Column name for malformed records
                   - 'maxColumns': Maximum number of columns to parse
                   - 'maxCharsPerColumn': Character limit per column
@@ -165,10 +174,12 @@ def load_csv(
 
     Raises:
         FileNotFoundError: If the specified CSV file does not exist at the given path.
-                          Error message includes full path for troubleshooting file location.
-        RuntimeError: If CSV loading fails due to format incompatibility, encoding issues,
-                     permission problems, cluster validation failures, or resource constraints.
-                     Includes detailed error context for troubleshooting and resolution.
+                          Error message includes full path for troubleshooting file
+                          location.
+        RuntimeError: If CSV loading fails due to format incompatibility, encoding
+                     issues, permission problems, cluster validation failures, or
+                     resource constraints.Includes detailed error context for
+                     troubleshooting and resolution.
 
     Performance Optimization Features:
         **Schema Inference Optimization**:
@@ -289,7 +300,8 @@ def load_csv(
 
     Error Handling and Recovery:
         **Format Error Recovery**: Graceful handling of malformed CSV records
-        **Encoding Error Management**: Automatic detection and reporting of encoding issues
+        **Encoding Error Management**: Automatic detection and reporting of encoding
+        issues
         **Performance Optimization**: Intelligent fallbacks for resource constraints
         **Validation Reporting**: Comprehensive data quality and format validation
 
@@ -301,9 +313,10 @@ def load_csv(
 
     Note:
         This function is optimized for production CSV processing with comprehensive
-        error handling, performance optimization, and format flexibility. The intelligent
-        defaults work for most CSV scenarios while providing extensive customization
-        for specialized enterprise requirements and legacy system integration.
+        error handling, performance optimization, and format flexibility. The
+        intelligent defaults work for most CSV scenarios while providing extensive
+        customization for specialized enterprise requirements and legacy system
+        integration.
     """
     file_path = Path(file_path)
 

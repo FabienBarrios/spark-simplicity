@@ -18,7 +18,8 @@ Key Features:
 CSV Standards & Compatibility:
     - **RFC 4180** compliant CSV output format
     - **UTF-8** default encoding with international character support
-    - **Flexible delimiters** supporting comma, semicolon, tab, pipe, and custom separators
+    - **Flexible delimiters** supporting comma, semicolon, tab, pipe, and custom
+      separators
     - **Configurable quoting** for handling special characters and embedded delimiters
     - **Escape sequences** for complex data scenarios
 
@@ -46,7 +47,7 @@ Usage:
 
 import shutil
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 from pyspark.sql import DataFrame
@@ -92,7 +93,8 @@ def _write_csv_spark_coalesced(
         encoding: Character encoding (UTF-8, latin-1, cp1252, etc.)
         quote: Quote character for fields containing special characters
         escape: Escape character for handling quotes within quoted fields
-        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat, etc.)
+        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat,
+                etc.)
 
     Raises:
         ValueError: If write mode is not supported
@@ -179,7 +181,8 @@ def _write_csv_spark_distributed(
         df: Spark DataFrame to write in distributed fashion
         output_path: Base name for distributed CSV output files. Becomes the prefix
                     for numbered files like output_000.csv, output_001.csv, etc.
-        shared_mount: Shared filesystem path accessible by all cluster nodes for temporary files
+        shared_mount: Shared filesystem path accessible by all cluster nodes for
+                     temporary files
         header: Whether to include column headers in each output file
         sep: Field delimiter character applied consistently across all files
         mode: Write mode determining behavior with existing data:
@@ -198,7 +201,8 @@ def _write_csv_spark_distributed(
 
     Output Structure:
         Multiple CSV files: output_000.csv, output_001.csv, etc.
-        Each file contains complete CSV with headers (if enabled) and subset of total data.
+        Each file contains complete CSV with headers (if enabled) and subset of total
+        data.
 
     Performance Benefits:
         - Full cluster parallelism during write operation
@@ -277,11 +281,13 @@ def _write_csv_pandas_fallback(
     escape: str,
 ) -> None:
     """
-    Write CSV using pandas fallback strategy for maximum compatibility and append support.
+    Write CSV using pandas fallback strategy for maximum compatibility and append
+    support.
 
     This fallback strategy converts the entire Spark DataFrame to pandas and writes
     using pandas' native CSV capabilities with advanced append functionality. Provides
-    maximum compatibility with edge cases, complex formatting scenarios, and sophisticated
+    maximum compatibility with edge cases, complex formatting scenarios, and
+    sophisticated
     append mode that can merge with existing CSV files. Limited by driver node memory
     capacity but offers the most flexible CSV operations.
 
@@ -381,7 +387,8 @@ def _write_csv_pandas_fallback(
 
     except Exception as e:
         raise RuntimeError(
-            f"Could not save the file (please verify the path, write permissions, and available "
+            f"Could not save the file (please verify the path, write permissions, and "
+            f"available "
             f"disk space) : CSV via pandas fallback: {str(e)}"
         ) from e
 
@@ -398,38 +405,50 @@ def write_csv(
     encoding: str = "UTF-8",
     quote: str = '"',
     escape: str = '"',
-    **options,
+    **options: Any,
 ) -> None:
     """
-    Export Spark DataFrame to CSV format with intelligent strategy selection and comprehensive formatting control.
+    Export Spark DataFrame to CSV format with intelligent strategy selection and
+    comprehensive formatting control.
 
-    Provides enterprise-grade CSV export functionality with multiple optimized writing strategies
-    for different use cases, from standard ETL workflows to high-performance data processing
-    pipelines. This function offers complete control over CSV formatting including delimiters,
-    encoding, quoting, and escaping while ensuring RFC 4180 compliance and cross-platform
+    Provides enterprise-grade CSV export functionality with multiple optimized writing
+    strategies
+    for different use cases, from standard ETL workflows to high-performance data
+    processing
+    pipelines. This function offers complete control over CSV formatting including
+    delimiters,
+    encoding, quoting, and escaping while ensuring RFC 4180 compliance and
+    cross-platform
     compatibility.
 
     The function supports three distinct strategies optimized for different scenarios:
     - **Coalesce**: Single CSV file optimal for ETL workflows and data exchange
-    - **Distributed**: Multiple CSV files leveraging full cluster parallelism for big data
-    - **Pandas**: Maximum compatibility with sophisticated append operations and edge case handling
+    - **Distributed**: Multiple CSV files leveraging full cluster parallelism for big
+      data
+    - **Pandas**: Maximum compatibility with sophisticated append operations and edge
+      case handling
 
     Args:
         df: Spark DataFrame containing the data to export. All Spark SQL data types
             are automatically converted to appropriate CSV string representations with
             proper escaping and formatting.
         output_path: Target file path or base name for CSV output. For single-file
-                    strategies ('coalesce', 'pandas'), should include the .csv extension.
+                    strategies ('coalesce', 'pandas'), should include the .csv
+                    extension.
                     For distributed strategy, becomes the base name for numbered files.
         shared_mount: Path to shared filesystem accessible by all cluster nodes (driver
-                     and executors). Required for 'coalesce' and 'distributed' strategies.
-                     Common examples: NFS mounts, shared network drives, HDFS, cloud storage.
+                     and executors). Required for 'coalesce' and 'distributed'
+                     strategies.
+                     Common examples: NFS mounts, shared network drives, HDFS, cloud
+                     storage.
                      If None, automatically falls back to pandas strategy.
         header: Whether to include column names as first row in CSV output. Enables
-               proper column identification for downstream processing and analysis tools.
+               proper column identification for downstream processing and analysis
+               tools.
         sep: Field delimiter character separating values in each row:
              - ',' (default): Standard comma-separated values
-             - ';': European standard, common in locales where comma is decimal separator
+             - ';': European standard, common in locales where comma is decimal
+               separator
              - '\t': Tab-separated values (TSV) for database imports
              - '|': Pipe-separated for systems requiring comma preservation
              - Custom characters for specialized formats
@@ -438,18 +457,27 @@ def write_csv(
               - 'append': Add new data to existing CSV files (pandas strategy only)
               - 'ignore': Skip write operation if output exists (idempotent behavior)
               - 'error': Fail with exception if output exists (strict safety mode)
-        strategy: Write strategy selection based on performance and compatibility requirements:
-                 - 'coalesce': Single CSV file via coalesce(1). Optimal for data exchange,
-                   ETL pipelines, and when downstream systems expect single files. May become
+        strategy: Write strategy selection based on performance and compatibility
+                 requirements:
+                 - 'coalesce': Single CSV file via coalesce(1). Optimal for data
+                   exchange,
+                   ETL pipelines, and when downstream systems expect single files. May
+                   become
                    bottleneck for very large datasets due to single-executor processing.
-                 - 'distributed': Multiple CSV files preserving natural Spark parallelism.
+                 - 'distributed': Multiple CSV files preserving natural Spark
+                   parallelism.
                    Optimal for big data scenarios, high-throughput processing, and when
-                   downstream systems can handle multiple files. Enables maximum write performance.
-                 - 'pandas': Single file via pandas conversion with advanced append support.
-                   Compatibility fallback for edge cases, complex append operations, or when
-                   cluster shared storage is unavailable. Limited by driver memory capacity.
+                   downstream systems can handle multiple files. Enables maximum write
+                   performance.
+                 - 'pandas': Single file via pandas conversion with advanced append
+                   support.
+                   Compatibility fallback for edge cases, complex append operations, or
+                   when
+                   cluster shared storage is unavailable. Limited by driver memory
+                   capacity.
         encoding: Character encoding for CSV output files:
-                 - 'UTF-8' (default): Universal encoding supporting international characters
+                 - 'UTF-8' (default): Universal encoding supporting international
+                   characters
                  - 'latin-1': Western European encoding for legacy system compatibility
                  - 'cp1252': Windows encoding for Microsoft Excel compatibility
                  - 'ascii': Basic ASCII encoding for maximum system compatibility
@@ -461,19 +489,25 @@ def write_csv(
                - '"' (default): Double-quote escaping (standard CSV behavior)
                - '\\': Backslash escaping for programmatic processing
                - Custom characters for specialized escape sequences
-        **options: Additional Spark DataFrameWriter options passed directly to underlying
+        **options: Additional Spark DataFrameWriter options passed directly to
+                  underlying
                   CSV writer. Common options include:
                   - 'dateFormat': Date formatting pattern (default: 'yyyy-MM-dd')
-                  - 'timestampFormat': Timestamp formatting pattern (default: 'yyyy-MM-dd HH:mm:ss')
-                  - 'nullValue': String representation for null values (default: empty string)
+                  - 'timestampFormat': Timestamp formatting pattern (default:
+                    'yyyy-MM-dd HH:mm:ss')
+                  - 'nullValue': String representation for null values (default: empty
+                    string)
                   - 'compression': Enable compression ('gzip', 'bzip2', 'xz', 'lz4')
 
     Raises:
         ValueError: If strategy is not in ['coalesce', 'distributed', 'pandas'], if mode
-                   is not valid for the selected strategy, or if delimiter/quote characters
+                   is not valid for the selected strategy, or if delimiter/quote
+                   characters
                    create formatting conflicts.
-        RuntimeError: If write operation fails due to insufficient disk space, permission
-                     errors, network connectivity issues with shared_mount, or if no output
+        RuntimeError: If write operation fails due to insufficient disk space,
+                     permission
+                     errors, network connectivity issues with shared_mount, or if no
+                     output
                      files are produced by Spark operations.
         MemoryError: If using pandas strategy with datasets too large for driver memory,
                     or if shared_mount is unavailable and fallback to pandas fails.
@@ -566,7 +600,8 @@ def write_csv(
     Note:
         CSV format is universally supported but can be less efficient than columnar
         formats like Parquet for analytical workloads. Consider Parquet for large-scale
-        analytics and CSV for data exchange, reporting, and system integration scenarios.
+        analytics and CSV for data exchange, reporting, and system integration
+        scenarios.
     """
     output_path = Path(output_path)
 

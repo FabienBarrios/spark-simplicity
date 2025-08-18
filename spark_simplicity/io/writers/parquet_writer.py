@@ -42,8 +42,9 @@ Usage:
 
 import shutil
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
+import pandas as pd
 from pyspark.sql import DataFrame
 
 from ...logger import get_logger
@@ -80,7 +81,8 @@ def _write_parquet_spark_coalesced(
         shared_mount: Shared filesystem path accessible by all cluster nodes
         mode: Write mode ('overwrite', 'append', 'ignore', 'error')
         compression: Parquet compression codec (snappy, gzip, brotli, etc.)
-        partition_by: Column names for partitioning (ignored with warning in coalesce mode)
+        partition_by: Column names for partitioning (ignored with warning in coalesce
+                     mode)
         options: Additional Spark DataFrameWriter options to apply
 
     Raises:
@@ -162,17 +164,21 @@ def _write_parquet_spark_distributed(
 
     Args:
         df: Spark DataFrame to write in distributed fashion
-        output_path: Base directory path for distributed Parquet output. For non-partitioned
-                    data, becomes the base name for numbered part files. For partitioned data,
+        output_path: Base directory path for distributed Parquet output. For
+                    non-partitioned
+                    data, becomes the base name for numbered part files. For
+                    partitioned data,
                     becomes the root directory containing partition subdirectories.
-        shared_mount: Shared filesystem path accessible by all cluster nodes for temporary files
+        shared_mount: Shared filesystem path accessible by all cluster nodes for
+                     temporary files
         mode: Write mode determining behavior with existing data:
               - 'overwrite': Replace existing files/directories
               - 'append': Add new files to existing directory structure
               - 'ignore': Skip operation if output exists
               - 'error': Fail if output exists
         compression: Parquet compression codec for storage optimization
-        partition_by: List of column names for Hive-style partitioning. Creates directory
+        partition_by: List of column names for Hive-style partitioning. Creates
+                     directory
                      structure like /year=2023/month=01/ enabling partition pruning.
                      None for non-partitioned output.
         options: Additional Spark DataFrameWriter options (maxRecordsPerFile, etc.)
@@ -182,8 +188,10 @@ def _write_parquet_spark_distributed(
         RuntimeError: If no part files are produced by Spark write operation
 
     Output Structure:
-        - Non-partitioned: Multiple files like output_path_000.parquet, output_path_001.parquet
-        - Partitioned: Directory tree like output_path/year=2023/month=01/part-00000.parquet
+        - Non-partitioned: Multiple files like output_path_000.parquet,
+          output_path_001.parquet
+        - Partitioned: Directory tree like
+          output_path/year=2023/month=01/part-00000.parquet
     """
     tmp_dir = _create_temp_directory(shared_mount, "spark_parquet")
 
@@ -240,7 +248,8 @@ def _write_parquet_spark_distributed(
             # Distributed strategy keeps separate files for maximum performance
             _rename_and_move_files(part_files, output_path, "Parquet")
             _parquet_logger.info(
-                "Parquet files written successfully (Spark distributed, multiple files): %s_*",
+                "Parquet files written successfully (Spark distributed, multiple "
+                "files): %s_*",
                 output_path.stem,
             )
 
@@ -290,14 +299,15 @@ def _write_parquet_pandas_fallback(
     valid_modes = {"overwrite"}
     if mode not in valid_modes:
         raise ValueError(
-            f"Pandas fallback mode only supports {valid_modes} for Parquet, got '{mode}'"
+            f"Pandas fallback mode only supports {valid_modes} for Parquet, got "
+            f"'{mode}'"
         )
 
     try:
         _parquet_logger.info("Converting Spark DataFrame to pandas...")
 
         # Collect all data to driver node
-        pandas_df = df.toPandas()
+        pandas_df: pd.DataFrame = df.toPandas()
         _parquet_logger.info("Collected %d records to driver node", len(pandas_df))
 
         # Ensure output directory exists
@@ -314,7 +324,8 @@ def _write_parquet_pandas_fallback(
 
     except Exception as e:
         raise RuntimeError(
-            f"Could not save the file (please verify the path, write permissions, and available "
+            f"Could not save the file (please verify the path, write permissions, and "
+            f"available "
             f"disk space) : Parquet via pandas fallback: {str(e)}"
         ) from e
 
@@ -328,19 +339,23 @@ def write_parquet(
     compression: str = "snappy",
     partition_by: Optional[List[str]] = None,
     strategy: str = "coalesce",
-    **options,
+    **options: Any,
 ) -> None:
     """
     Export Spark DataFrame to Apache Parquet format with intelligent strategy selection.
 
-    Provides multiple optimized writing strategies for different use cases, from simple ETL
-    scenarios to high-performance data lakes. This function automatically handles temporary
+    Provides multiple optimized writing strategies for different use cases, from simple
+    ETL
+    scenarios to high-performance data lakes. This function automatically handles
+    temporary
     file management, compression optimization, and partitioning schemes while ensuring
     consistent output regardless of cluster configuration.
 
     The function supports three distinct strategies optimized for different scenarios:
-    - **Coalesce**: Produces single files optimal for ETL workflows and small-to-medium datasets
-    - **Distributed**: Leverages full cluster parallelism for maximum throughput on large datasets
+    - **Coalesce**: Produces single files optimal for ETL workflows and
+      small-to-medium datasets
+    - **Distributed**: Leverages full cluster parallelism for maximum throughput on
+      large datasets
     - **Pandas**: Provides maximum compatibility fallback for edge cases and small data
 
     Args:
@@ -351,48 +366,71 @@ def write_parquet(
                     extension. For distributed strategy, this becomes the base directory
                     name for multiple part files or partitioned structure.
         shared_mount: Path to shared filesystem accessible by all cluster nodes (driver
-                     and executors). Required for 'coalesce' and 'distributed' strategies.
+                     and executors). Required for 'coalesce' and 'distributed'
+                     strategies.
                      Common examples: NFS mounts, shared network drives, or distributed
                      filesystems like HDFS. If None, automatically falls back to pandas.
         mode: Write mode determining behavior when output already exists:
-              - 'overwrite': Replace existing files/directories (default, safest for ETL)
+              - 'overwrite': Replace existing files/directories (default, safest for
+                ETL)
               - 'append': Add new data to existing Parquet files (schema must match)
               - 'ignore': Skip write operation if output exists (idempotent behavior)
               - 'error': Fail with exception if output exists (strict safety mode)
-        compression: Parquet compression codec for optimal storage and query performance:
-                    - 'snappy': Fast compression/decompression, good for frequent reads (default)
-                    - 'gzip': Higher compression ratio, slower processing, good for archival
-                    - 'lzo': Fast compression similar to snappy, good for write-heavy workloads
-                    - 'brotli': Excellent compression ratio, moderate speed, good for analytics
-                    - 'lz4': Extremely fast, lower compression, good for temporary storage
+        compression: Parquet compression codec for optimal storage and query
+                    performance:
+                    - 'snappy': Fast compression/decompression, good for frequent reads
+                      (default)
+                    - 'gzip': Higher compression ratio, slower processing, good for
+                      archival
+                    - 'lzo': Fast compression similar to snappy, good for write-heavy
+                      workloads
+                    - 'brotli': Excellent compression ratio, moderate speed, good for
+                      analytics
+                    - 'lz4': Extremely fast, lower compression, good for temporary
+                      storage
                     - 'zstd': Balanced speed/compression, good all-around choice
-        partition_by: List of column names for Hive-style partitioning (distributed strategy only).
-                     Creates directory structure like /year=2023/month=01/ enabling partition
-                     pruning for query optimization. Columns should have reasonable cardinality
-                     (typically < 1000 unique values per column). Ignored in other strategies.
+        partition_by: List of column names for Hive-style partitioning (distributed
+                     strategy only).
+                     Creates directory structure like /year=2023/month=01/ enabling
+                     partition
+                     pruning for query optimization. Columns should have reasonable
+                     cardinality
+                     (typically < 1000 unique values per column). Ignored in other
+                     strategies.
         strategy: Write strategy selection based on performance requirements:
-                 - 'coalesce': Single output file via coalesce(1). Optimal for ETL pipelines,
-                   data archival, and when downstream systems expect single files. Slower for
+                 - 'coalesce': Single output file via coalesce(1). Optimal for ETL
+                   pipelines,
+                   data archival, and when downstream systems expect single files.
+                   Slower for
                    very large datasets due to single-executor bottleneck.
-                 - 'distributed': Multiple part files preserving natural Spark parallelism.
-                   Optimal for data lake scenarios, large datasets (>1GB), and when downstream
-                   systems can handle multiple files. Enables partitioning and maximum throughput.
-                 - 'pandas': Single file via pandas conversion. Compatibility fallback for edge
-                   cases, debugging, or when cluster shared storage is unavailable. Limited by
+                 - 'distributed': Multiple part files preserving natural Spark
+                   parallelism.
+                   Optimal for data lake scenarios, large datasets (>1GB), and when
+                   downstream
+                   systems can handle multiple files. Enables partitioning and maximum
+                   throughput.
+                 - 'pandas': Single file via pandas conversion. Compatibility fallback
+                   for edge
+                   cases, debugging, or when cluster shared storage is unavailable.
+                   Limited by
                    driver memory capacity.
-        **options: Additional Spark DataFrameWriter options passed directly to the underlying
+        **options: Additional Spark DataFrameWriter options passed directly to the
+                  underlying
                   Parquet writer. Common options include:
                   - 'maxRecordsPerFile': Limit records per output file for size control
                   - 'bucketBy': Enable bucketing for join optimization
                   - 'sortBy': Sort data within buckets for query performance
-                  - 'option("parquet.block.size", "134217728")': Control Parquet block size
+                  - 'option("parquet.block.size", "134217728")': Control Parquet block
+                    size
 
     Raises:
         ValueError: If strategy is not in ['coalesce', 'distributed', 'pandas'], if mode
                    is not valid for the selected strategy, or if partition_by columns
                    don't exist in the DataFrame schema.
-        RuntimeError: If write operation fails due to insufficient disk space, permission
-                     errors, network connectivity issues with shared_mount, or if no output
+        RuntimeError: If write operation fails due to insufficient disk space,
+                     permission
+                     errors, network connectivity issues with shared_mount, or if no
+                     output
                      files are produced by Spark (indicating internal Spark issues).
         MemoryError: If using pandas strategy with datasets too large for driver memory,
                     or if shared_mount is unavailable and fallback to pandas fails.

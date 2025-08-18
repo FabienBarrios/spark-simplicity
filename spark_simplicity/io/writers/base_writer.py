@@ -8,7 +8,8 @@ compatibility. This module contains the core infrastructure used by all format-s
 writers to ensure consistent behavior and robust file handling.
 
 Key Features:
-    - **Temporary Directory Management**: Safe creation and cleanup of temporary directories
+    - **Temporary Directory Management**: Safe creation and cleanup of temporary
+      directories
     - **Distributed File Operations**: Efficient handling of Spark's multi-file output
     - **Cross-Platform Compatibility**: Windows, Linux, and macOS file system support
     - **Atomic File Operations**: Safe file moving and renaming with error recovery
@@ -16,7 +17,8 @@ Key Features:
     - **Resource Cleanup**: Automatic temporary resource cleanup with error handling
 
 Core Functionality:
-    - **Directory Creation**: Secure temporary directory creation with proper permissions
+    - **Directory Creation**: Secure temporary directory creation with proper
+      permissions
     - **File Renaming**: Intelligent file renaming for distributed Spark output
     - **Cleanup Operations**: Robust cleanup with retry logic for network filesystems
     - **Error Handling**: Comprehensive error recovery and logging
@@ -26,7 +28,11 @@ Usage:
     intended for direct use by end users. They provide the foundation for reliable
     file operations across different storage systems and platforms.
 
-    from .base_writer import _create_temp_directory, _rename_and_move_files, _cleanup_temp_directory
+    from .base_writer import (
+        _create_temp_directory,
+        _rename_and_move_files,
+        _cleanup_temp_directory,
+    )
 """
 
 import shutil
@@ -54,9 +60,12 @@ def _rename_and_move_files(
     Args:
         part_files: List of Path objects pointing to Spark-generated part files
                    (e.g., part-00000-uuid.format, part-00001-uuid.format, etc.)
-                   Files are automatically sorted before processing for consistent ordering.
-        output_path: Base path template for the final output files. The stem (filename without
-                    extension) becomes the prefix for numbered files. The directory structure
+                   Files are automatically sorted before processing for consistent
+                   ordering.
+        output_path: Base path template for the final output files. The stem (filename
+                    without
+                    extension) becomes the prefix for numbered files. The directory
+                    structure
                     is created automatically if it doesn't exist.
         file_type: Format identifier used for logging and error messages. Also used as
                   default file extension if output_path doesn't specify one.
@@ -139,10 +148,12 @@ def _create_temp_directory(shared_mount: Union[str, Path], prefix: str) -> Path:
                      (driver and executors). Must be writable by Spark processes.
                      Examples: NFS mount, HDFS path, cloud storage mount point.
         prefix: Prefix for the temporary directory name to identify the operation type.
-               Should indicate the format or operation (e.g., "spark_csv", "spark_parquet").
+               Should indicate the format or operation (e.g., "spark_csv",
+               "spark_parquet").
 
     Returns:
-        Path object pointing to the created temporary directory with guaranteed uniqueness.
+        Path object pointing to the created temporary directory with guaranteed
+        uniqueness.
 
     Directory Structure:
         The created directory follows the pattern: _{prefix}_tmp_{uuid}
@@ -190,7 +201,8 @@ def _cleanup_temp_directory(tmp_dir: Path) -> None:
         4. Handles various edge cases (locked files, permission issues, network delays)
 
     Error Handling Strategy:
-        - **Graceful Degradation**: All errors are silently handled to prevent interruption
+        - **Graceful Degradation**: All errors are silently handled to prevent
+          interruption
         - **Network Filesystems**: Accommodates delays and consistency issues
         - **Permission Issues**: Ignores files that cannot be removed due to permissions
         - **Concurrent Access**: Handles conflicts with other processes accessing files
@@ -205,7 +217,8 @@ def _cleanup_temp_directory(tmp_dir: Path) -> None:
     Raises:
         No exceptions are raised - all errors are suppressed with ignore_errors=True.
         This design ensures that temporary cleanup failures don't interrupt the main
-        data processing workflow, prioritizing data operation success over cleanup perfection.
+        data processing workflow, prioritizing data operation success over cleanup
+        perfection.
 
     Usage Pattern:
         This function should always be called in a try-finally block or similar

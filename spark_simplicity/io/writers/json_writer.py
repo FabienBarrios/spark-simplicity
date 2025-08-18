@@ -3,8 +3,10 @@ Spark Simplicity - JSON Writers
 ===============================
 
 High-performance JSON writers for Spark DataFrames with flexible formatting options
-and intelligent strategy selection. This module provides optimized JSON export capabilities
-supporting both single-file and distributed output strategies with proper JSON array formatting.
+and intelligent strategy selection. This module provides optimized JSON export
+capabilities
+supporting both single-file and distributed output strategies with proper JSON array
+formatting.
 
 Key Features:
     - Multiple optimized writing strategies (coalesce, distributed, pandas)
@@ -40,8 +42,9 @@ Usage:
 
 import json
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
+import pandas as pd
 from pyspark.sql import DataFrame
 
 from ...logger import get_logger
@@ -77,7 +80,8 @@ def _write_json_spark_coalesced(
         shared_mount: Shared filesystem path accessible by all cluster nodes
         mode: Write mode ('overwrite', 'append', 'ignore', 'error')
         pretty: If True, formats output with indentation and line breaks for readability
-        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat, etc.)
+        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat,
+                etc.)
 
     Raises:
         ValueError: If write mode is not supported
@@ -143,15 +147,18 @@ def _write_json_spark_distributed(
     Args:
         df: Spark DataFrame to write in distributed fashion
         output_path: Base name for distributed JSON output files. Becomes the prefix
-                    for numbered files like output_path_000.json, output_path_001.json, etc.
-        shared_mount: Shared filesystem path accessible by all cluster nodes for temporary files
+                    for numbered files like output_path_000.json, output_path_001.json,
+                    etc.
+        shared_mount: Shared filesystem path accessible by all cluster nodes for
+                     temporary files
         mode: Write mode determining behavior with existing data:
               - 'overwrite': Replace existing files
               - 'append': Add new files alongside existing ones
               - 'ignore': Skip operation if output files exist
               - 'error': Fail if any output files exist
         pretty: If True, formats each JSON file with indentation and line breaks
-        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat, etc.)
+        options: Additional Spark DataFrameWriter options (dateFormat, timestampFormat,
+                etc.)
 
     Raises:
         ValueError: If write mode is not in supported modes
@@ -194,7 +201,8 @@ def _write_json_spark_distributed(
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Distributed strategy keeps separate files for maximum performance with proper JSON formatting
+        # Distributed strategy keeps separate files for maximum performance with proper
+        # JSON formatting
         process_and_move_json_files(part_files, output_path, pretty)
         _json_logger.info(
             "JSON files written successfully (Spark distributed, multiple files): %s_*",
@@ -209,7 +217,8 @@ def _write_json_pandas_fallback(
     df: DataFrame, output_path: Path, mode: str, pretty: bool
 ) -> None:
     """
-    Write JSON using pandas fallback strategy for maximum compatibility and append support.
+    Write JSON using pandas fallback strategy for maximum compatibility and append
+    support.
 
     This fallback strategy converts the entire Spark DataFrame to pandas and writes
     using Python's native JSON library with advanced append functionality. Provides
@@ -266,7 +275,7 @@ def _write_json_pandas_fallback(
         _json_logger.info("Converting Spark DataFrame to pandas...")
 
         # Collect all data to driver node
-        pandas_df = df.toPandas()
+        pandas_df: pd.DataFrame = df.toPandas()
         new_data = pandas_df.to_dict("records")
 
         _json_logger.info("Collected %d records to driver node", len(new_data))
@@ -302,10 +311,10 @@ def _write_json_pandas_fallback(
         with open(output_path, "w", encoding="utf-8") as f:
             if pretty:
                 # Pretty JSON array format: proper JSON array with indentation
-                json.dump(combined_data, f, ensure_ascii=False, indent=2)  # type: ignore
+                json.dump(combined_data, f, ensure_ascii=False, indent=2)
             else:
                 # Compact JSON array format: all data on single line
-                json.dump(combined_data, f, ensure_ascii=False, separators=(",", ":"))  # type: ignore
+                json.dump(combined_data, f, ensure_ascii=False, separators=(",", ":"))
 
         _json_logger.info(
             "JSON written successfully (pandas fallback): %s (%d total records)",
@@ -315,7 +324,8 @@ def _write_json_pandas_fallback(
 
     except Exception as e:
         raise RuntimeError(
-            f"Could not save the file (please verify the path, write permissions, and available "
+            f"Could not save the file (please verify the path, write permissions, and "
+            f"available "
             f"disk space) : JSON via pandas fallback: {str(e)}"
         ) from e
 
@@ -328,19 +338,25 @@ def write_json(
     mode: str = "overwrite",
     pretty: bool = False,
     strategy: str = "coalesce",
-    **options,
+    **options: Any,
 ) -> None:
     """
-    Export Spark DataFrame to JSON format with intelligent strategy selection and formatting.
+    Export Spark DataFrame to JSON format with intelligent strategy selection and
+    formatting.
 
-    Provides multiple optimized writing strategies for different use cases, from simple data
-    exchange scenarios to high-performance data processing pipelines. This function automatically
-    converts Spark's native JSONL output to proper JSON array format with optional pretty-printing,
+    Provides multiple optimized writing strategies for different use cases, from simple
+    data
+    exchange scenarios to high-performance data processing pipelines. This function
+    automatically
+    converts Spark's native JSONL output to proper JSON array format with optional
+    pretty-printing,
     ensuring standards compliance and downstream system compatibility.
 
     The function supports three distinct strategies optimized for different scenarios:
-    - **Coalesce**: Produces single JSON files optimal for data exchange and ETL workflows
-    - **Distributed**: Leverages full cluster parallelism for maximum throughput on large datasets
+    - **Coalesce**: Produces single JSON files optimal for data exchange and ETL
+      workflows
+    - **Distributed**: Leverages full cluster parallelism for maximum throughput on
+      large datasets
     - **Pandas**: Provides maximum compatibility with advanced append functionality
 
     Args:
@@ -351,38 +367,55 @@ def write_json(
                     extension. For distributed strategy, this becomes the base name
                     for multiple numbered JSON files.
         shared_mount: Path to shared filesystem accessible by all cluster nodes (driver
-                     and executors). Required for 'coalesce' and 'distributed' strategies.
+                     and executors). Required for 'coalesce' and 'distributed'
+                     strategies.
                      Common examples: NFS mounts, shared network drives, or distributed
                      filesystems like HDFS. If None, automatically falls back to pandas.
         mode: Write mode determining behavior when output already exists:
               - 'overwrite': Replace existing files completely (default, safest for ETL)
-              - 'append': Merge new data with existing JSON arrays (pandas strategy only)
+              - 'append': Merge new data with existing JSON arrays (pandas strategy
+                only)
               - 'ignore': Skip write operation if output exists (idempotent behavior)
               - 'error': Fail with exception if output exists (strict safety mode)
         pretty: Format control for JSON output readability:
-               - False: Compact single-line format for production/processing systems (default)
+               - False: Compact single-line format for production/processing systems
+                 (default)
                - True: Indented multi-line format for human readability and debugging
-        strategy: Write strategy selection based on performance and compatibility requirements:
-                 - 'coalesce': Single JSON file via coalesce(1). Optimal for data exchange,
-                   ETL pipelines, and when downstream systems expect single files. May become
+        strategy: Write strategy selection based on performance and compatibility
+                 requirements:
+                 - 'coalesce': Single JSON file via coalesce(1). Optimal for data
+                   exchange,
+                   ETL pipelines, and when downstream systems expect single files. May
+                   become
                    bottleneck for very large datasets due to single-executor processing.
-                 - 'distributed': Multiple JSON files preserving natural Spark parallelism.
-                   Optimal for big data scenarios, high-throughput processing, and when downstream
+                 - 'distributed': Multiple JSON files preserving natural Spark
+                   parallelism.
+                   Optimal for big data scenarios, high-throughput processing, and when
+                   downstream
                    systems can handle multiple files. Enables maximum write performance.
-                 - 'pandas': Single file via pandas conversion with advanced append support.
-                   Compatibility fallback for edge cases, complex append operations, or when
-                   cluster shared storage is unavailable. Limited by driver memory capacity.
-        **options: Additional Spark DataFrameWriter options passed directly to the underlying
+                 - 'pandas': Single file via pandas conversion with advanced append
+                   support.
+                   Compatibility fallback for edge cases, complex append operations,
+                   or when
+                   cluster shared storage is unavailable. Limited by driver memory
+                   capacity.
+        **options: Additional Spark DataFrameWriter options passed directly to the
+                  underlying
                   JSON writer. Common options include:
                   - 'dateFormat': Date formatting pattern (default: 'yyyy-MM-dd')
-                  - 'timestampFormat': Timestamp formatting pattern (default: 'yyyy-MM-dd HH:mm:ss')
-                  - 'compression': Enable compression for temporary files ('gzip', 'bzip2')
+                  - 'timestampFormat': Timestamp formatting pattern (default:
+                    'yyyy-MM-dd HH:mm:ss')
+                  - 'compression': Enable compression for temporary files ('gzip',
+                    'bzip2')
 
     Raises:
         ValueError: If strategy is not in ['coalesce', 'distributed', 'pandas'], if mode
-                   is not valid for the selected strategy, or if required parameters are missing.
-        RuntimeError: If write operation fails due to insufficient disk space, permission
-                     errors, network connectivity issues with shared_mount, or if no output
+                   is not valid for the selected strategy, or if required parameters are
+                   missing.
+        RuntimeError: If write operation fails due to insufficient disk space,
+                     permission
+                     errors, network connectivity issues with shared_mount, or if no
+                     output
                      files are produced by Spark.
         MemoryError: If using pandas strategy with datasets too large for driver memory,
                     or if shared_mount is unavailable and fallback to pandas fails.
@@ -453,7 +486,8 @@ def write_json(
         ]
         ```
 
-        **Distributed Strategy**: Multiple files like output_000.json, output_001.json, etc.
+        **Distributed Strategy**: Multiple files like output_000.json, output_001.json,
+        etc.
         Each file contains a complete JSON array with subset of the total data.
 
     JSON Standards Compliance:

@@ -23,14 +23,14 @@ def mock_spark_session():
     mock_context = Mock()
     mock_context.applicationId = "test-connections-app-123"
     mock_spark.sparkContext = mock_context
-    
+
     # Mock read pour DataFrameReader
     mock_reader = Mock()
     mock_reader.option.return_value = mock_reader
     mock_reader.format.return_value = mock_reader
     mock_reader.load.return_value = Mock(spec=DataFrame)
     mock_spark.read = mock_reader
-    
+
     return mock_spark
 
 
@@ -45,10 +45,10 @@ def sample_database_config():
     """Configuration de base de données standard pour les tests."""
     return {
         "host": "localhost",
-        "port": "1433", 
+        "port": "1433",
         "database": "test_database",
         "user": "test_user",
-        "password": "test_password"
+        "password": "test_password",
     }
 
 
@@ -58,8 +58,8 @@ def minimal_database_config():
     return {
         "host": "testhost",
         "database": "testdb",
-        "user": "testuser", 
-        "password": "testpass"
+        "user": "testuser",
+        "password": "testpass",
     }
 
 
@@ -71,7 +71,7 @@ def production_database_config():
         "port": "1434",
         "database": "production_db",
         "user": "prod_user",
-        "password": "super_secure_password_123!"
+        "password": "super_secure_password_123!",
     }
 
 
@@ -83,7 +83,7 @@ def config_with_port():
         "port": "1434",
         "database": "proddb",
         "user": "produser",
-        "password": "prodpass"
+        "password": "prodpass",
     }
 
 
@@ -113,7 +113,7 @@ def sample_sql_queries():
         "simple": "SELECT * FROM users",
         "with_where": "SELECT * FROM users WHERE active = 1",
         "complex": """
-            SELECT 
+            SELECT
                 u.id,
                 u.name,
                 COUNT(o.id) as order_count,
@@ -125,8 +125,8 @@ def sample_sql_queries():
             HAVING COUNT(o.id) > 0
             ORDER BY total_spent DESC
         """,
-        "count": "SELECT COUNT(*) FROM users",
-        "insert": "INSERT INTO users (name, email) VALUES ('Test', 'test@example.com')"
+        "count": "SELECT COUNT(*) as count FROM users",
+        "insert": "INSERT INTO users (name, email) VALUES ('Test', 'test@example.com')",
     }
 
 
@@ -138,23 +138,23 @@ def sample_partitioning_options():
             "numPartitions": "4",
             "partitionColumn": "id",
             "lowerBound": "1",
-            "upperBound": "1000"
+            "upperBound": "1000",
         },
         "with_fetchsize": {
             "numPartitions": "8",
             "partitionColumn": "user_id",
             "lowerBound": "1",
             "upperBound": "10000",
-            "fetchsize": "10000"
+            "fetchsize": "10000",
         },
         "advanced": {
-            "numPartitions": "10", 
+            "numPartitions": "10",
             "partitionColumn": "created_at",
             "lowerBound": "2024-01-01",
             "upperBound": "2024-12-31",
             "fetchsize": "5000",
-            "queryTimeout": "300"
-        }
+            "queryTimeout": "300",
+        },
     }
 
 
@@ -171,7 +171,7 @@ def malicious_sql_patterns():
         "'; INSERT INTO users VALUES ('hacker', 'password'); --",
         "admin' OR 1=1#",
         "admin'/**/OR/**/1=1--",
-        "1'; DELETE FROM users WHERE 't'='t"
+        "1'; DELETE FROM users WHERE 't'='t",
     ]
 
 
@@ -183,7 +183,7 @@ def unicode_test_data():
         "cyrillic": "тестовая_база_данных",
         "portuguese": "usuário_teste",
         "emoji": "пароль🔒密码",
-        "mixed": "Hello世界🌍Test"
+        "mixed": "Hello世界🌍Test",
     }
 
 
@@ -195,7 +195,7 @@ def email_config():
         "smtp_port": 587,
         "email": "test@example.com",
         "password": "test_password",
-        "use_tls": True
+        "use_tls": True,
     }
 
 
@@ -203,9 +203,24 @@ def email_config():
 def bulk_recipients():
     """Recipients data for bulk email testing."""
     return [
-        {"email": "user1@example.com", "name": "User One", "company": "Company A", "balance": "1000"},
-        {"email": "user2@example.com", "name": "User Two", "company": "Company B", "balance": "2500"},
-        {"email": "user3@example.com", "name": "User Three", "company": "Company C", "balance": "750"}
+        {
+            "email": "user1@example.com",
+            "name": "User One",
+            "company": "Company A",
+            "balance": "1000",
+        },
+        {
+            "email": "user2@example.com",
+            "name": "User Two",
+            "company": "Company B",
+            "balance": "2500",
+        },
+        {
+            "email": "user3@example.com",
+            "name": "User Three",
+            "company": "Company C",
+            "balance": "750",
+        },
     ]
 
 
@@ -217,7 +232,7 @@ def sftp_config():
         "port": 22,
         "username": "test_user",
         "password": "test_password",
-        "remote_path": "/data/"
+        "remote_path": "/data/",
     }
 
 
@@ -228,7 +243,7 @@ def rest_api_config():
         "base_url": "https://api.example.com",
         "api_key": "test_api_key",
         "timeout": 30,
-        "max_retries": 3
+        "max_retries": 3,
     }
 
 
@@ -238,7 +253,7 @@ def sample_rest_api_config():
     return {
         "base_url": "https://api.example.com",
         "headers": {"Content-Type": "application/json"},
-        "timeout": 10
+        "timeout": 10,
     }
 
 
@@ -247,12 +262,9 @@ def production_rest_api_config():
     """Configuration REST API pour environnement de production."""
     return {
         "base_url": "https://prod-api.company.com",
-        "headers": {
-            "Content-Type": "application/json",
-            "X-Environment": "production"
-        },
+        "headers": {"Content-Type": "application/json", "X-Environment": "production"},
         "timeout": 30,
-        "retries": 5
+        "retries": 5,
     }
 
 
@@ -261,12 +273,9 @@ def auth_rest_api_config():
     """Configuration REST API avec authentification."""
     return {
         "base_url": "https://secure-api.example.com",
-        "headers": {
-            "Authorization": "Bearer token123",
-            "X-API-Key": "api-key-456"
-        },
+        "headers": {"Authorization": "Bearer token123", "X-API-Key": "api-key-456"},
         "auth": ("admin", "secret"),
-        "timeout": 30
+        "timeout": 30,
     }
 
 
@@ -278,7 +287,7 @@ def custom_retry_config():
         "retries": 5,
         "backoff_factor": 0.5,
         "status_forcelist": [500, 502, 503, 504, 429],
-        "timeout": 20
+        "timeout": 20,
     }
 
 
@@ -291,7 +300,7 @@ def connection_error_scenarios():
         "auth_failed": "Authentication failed",
         "host_unreachable": "Host unreachable",
         "ssl_error": "SSL certificate verification failed",
-        "permission_denied": "Permission denied"
+        "permission_denied": "Permission denied",
     }
 
 
@@ -312,6 +321,7 @@ def setup_connections_test_environment():
 
 # Fixtures spécifiques aux différents types de connections
 
+
 @pytest.fixture(scope="function")
 def database_connections_configs():
     """Multiples configurations de base de données pour tests avancés."""
@@ -321,22 +331,22 @@ def database_connections_configs():
             "port": "1433",
             "database": "dev_database",
             "user": "dev_user",
-            "password": "dev_password"
+            "password": "dev_password",
         },
         "staging": {
-            "host": "staging-db.company.com", 
+            "host": "staging-db.company.com",
             "port": "1433",
             "database": "staging_database",
             "user": "staging_user",
-            "password": "staging_password"
+            "password": "staging_password",
         },
         "prod": {
             "host": "prod-db.company.com",
             "port": "1434",
             "database": "production_database",
             "user": "prod_user",
-            "password": "prod_password"
-        }
+            "password": "prod_password",
+        },
     }
 
 
@@ -344,10 +354,22 @@ def database_connections_configs():
 def jdbc_url_variations():
     """Variations d'URL JDBC pour tests."""
     return {
-        "basic": "jdbc:sqlserver://localhost:1433;databaseName=testdb;encrypt=true;trustServerCertificate=true",
-        "with_custom_port": "jdbc:sqlserver://server.com:1434;databaseName=proddb;encrypt=true;trustServerCertificate=true",
-        "with_ip": "jdbc:sqlserver://192.168.1.100:1433;databaseName=mydb;encrypt=true;trustServerCertificate=true",
-        "with_instance": "jdbc:sqlserver://server\\SQLEXPRESS:1433;databaseName=testdb;encrypt=true;trustServerCertificate=true"
+        "basic": (
+            "jdbc:sqlserver://localhost:1433;databaseName=testdb;"
+            "encrypt=true;trustServerCertificate=true"
+        ),
+        "with_custom_port": (
+            "jdbc:sqlserver://server.com:1434;databaseName=proddb;"
+            "encrypt=true;trustServerCertificate=true"
+        ),
+        "with_ip": (
+            "jdbc:sqlserver://192.168.1.100:1433;databaseName=mydb;"
+            "encrypt=true;trustServerCertificate=true"
+        ),
+        "with_instance": (
+            "jdbc:sqlserver://server\\SQLEXPRESS:1433;databaseName=testdb;"
+            "encrypt=true;trustServerCertificate=true"
+        ),
     }
 
 
@@ -359,21 +381,21 @@ def base_options_variations():
             "user": "testuser",
             "password": "testpass",
             "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-            "fetchsize": "5000"
+            "fetchsize": "5000",
         },
         "large_fetchsize": {
             "user": "testuser",
-            "password": "testpass", 
+            "password": "testpass",
             "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-            "fetchsize": "50000"
+            "fetchsize": "50000",
         },
         "with_timeout": {
             "user": "testuser",
             "password": "testpass",
             "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
             "fetchsize": "5000",
-            "queryTimeout": "300"
-        }
+            "queryTimeout": "300",
+        },
     }
 
 
@@ -386,11 +408,11 @@ def invalid_configurations():
         "missing_user": {"host": "test", "database": "test", "password": "test"},
         "missing_password": {"host": "test", "database": "test", "user": "test"},
         "empty_values": {"host": "", "database": "", "user": "", "password": ""},
-        "none_values": {"host": None, "database": None, "user": None, "password": None}
+        "none_values": {"host": None, "database": None, "user": None, "password": None},
     }
 
 
-@pytest.fixture(scope="function") 
+@pytest.fixture(scope="function")
 def performance_test_configs():
     """Configurations pour tests de performance."""
     return {
@@ -399,15 +421,15 @@ def performance_test_configs():
             "port": "1433",
             "database": "analytics_db",
             "user": "analytics_user",
-            "password": "analytics_password"
+            "password": "analytics_password",
         },
         "concurrent_access": {
-            "host": "concurrent-db.company.com", 
+            "host": "concurrent-db.company.com",
             "port": "1434",
             "database": "concurrent_db",
             "user": "concurrent_user",
-            "password": "concurrent_password"
-        }
+            "password": "concurrent_password",
+        },
     }
 
 
@@ -415,14 +437,26 @@ def performance_test_configs():
 def stress_test_data():
     """Données pour tests de stress et de charge."""
     return {
-        "large_query": "SELECT * FROM very_large_table WHERE complex_condition = 'value'",
+        "large_query": (
+            "SELECT * FROM very_large_table WHERE complex_condition = 'value'"
+        ),
         "concurrent_queries": [
-            "SELECT COUNT(*) FROM table1",
-            "SELECT AVG(value) FROM table2",
-            "SELECT MAX(timestamp) FROM table3"
+            "SELECT COUNT(*) as count FROM table1",
+            "SELECT AVG(value) as avg FROM table2",
+            "SELECT MAX(timestamp) as max FROM table3",
         ],
         "partitioning_scenarios": [
-            {"numPartitions": "10", "partitionColumn": "id", "lowerBound": "1", "upperBound": "1000000"},
-            {"numPartitions": "20", "partitionColumn": "date", "lowerBound": "2020-01-01", "upperBound": "2024-12-31"}
-        ]
+            {
+                "numPartitions": "10",
+                "partitionColumn": "id",
+                "lowerBound": "1",
+                "upperBound": "1000000",
+            },
+            {
+                "numPartitions": "20",
+                "partitionColumn": "date",
+                "lowerBound": "2020-01-01",
+                "upperBound": "2024-12-31",
+            },
+        ],
     }

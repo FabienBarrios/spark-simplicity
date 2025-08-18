@@ -2,9 +2,12 @@
 Spark Simplicity - File System Utilities
 ========================================
 
-Comprehensive file system utilities for enterprise-grade I/O operations and metadata analysis.
-This module provides essential file system interaction capabilities including file information
-retrieval, format detection, and metadata extraction optimized for data processing workflows.
+Comprehensive file system utilities for enterprise-grade I/O operations and metadata
+analysis.
+This module provides essential file system interaction capabilities including file
+information
+retrieval, format detection, and metadata extraction optimized for data processing
+workflows.
 Designed to support robust file handling across different platforms and storage systems.
 
 Key Features:
@@ -13,7 +16,8 @@ Key Features:
     - **Cross-Platform Support**: Windows, Linux, and macOS file system compatibility
     - **Storage System Integration**: Support for local, network, and cloud storage
     - **Error Handling**: Robust error handling with descriptive messages
-    - **Performance Optimization**: Efficient file system operations with minimal overhead
+    - **Performance Optimization**: Efficient file system operations with minimal
+      overhead
 
 File Format Support:
     **Data Formats**:
@@ -33,7 +37,8 @@ Metadata Capabilities:
     - **File Size Analysis**: Byte-level and human-readable size reporting
     - **Timestamp Information**: File modification time tracking
     - **Path Analysis**: Complete path, name, and extension extraction
-    - **Format Classification**: Automatic format categorization for processing workflows
+    - **Format Classification**: Automatic format categorization for processing
+      workflows
 
 Enterprise Features:
     - **Production Safety**: Comprehensive error handling for missing files
@@ -54,15 +59,20 @@ from typing import Any, Dict, Union
 
 def get_file_info(file_path: Union[str, Path]) -> Dict[str, Any]:
     """
-    Extract comprehensive file system metadata and format information for data processing workflows.
+    Extract comprehensive file system metadata and format information for data
+    processing workflows.
 
-    Provides detailed file analysis including size metrics, format detection, timestamps, and
+    Provides detailed file analysis including size metrics, format detection,
+    timestamps, and
     path information essential for data pipeline operations, capacity planning, and file
-    processing decisions. This function serves as the foundation for intelligent file handling
+    processing decisions. This function serves as the foundation for intelligent file
+    handling
     across different storage systems and data processing scenarios.
 
-    The function combines file system metadata with intelligent format detection to provide
-    a complete picture of file characteristics needed for automated data processing workflows,
+    The function combines file system metadata with intelligent format detection to
+    provide
+    a complete picture of file characteristics needed for automated data processing
+    workflows,
     monitoring systems, and capacity management operations.
 
     Args:
@@ -86,7 +96,8 @@ def get_file_info(file_path: Union[str, Path]) -> Dict[str, Any]:
 
     Raises:
         FileNotFoundError: If the specified file does not exist at the given path.
-                          The error message includes the full path and suggests verification
+                          The error message includes the full path and suggests
+                          verification
                           steps for troubleshooting missing file issues.
 
     Format Detection Logic:
@@ -192,14 +203,17 @@ def get_file_info(file_path: Union[str, Path]) -> Dict[str, Any]:
         **Automation**: File-based triggering and routing in data pipelines
 
     Error Handling:
-        The function provides clear, actionable error messages for common failure scenarios:
+        The function provides clear, actionable error messages for common failure
+        scenarios:
         - Missing files with full path information for troubleshooting
         - Permission issues are surfaced through underlying file system errors
         - Network connectivity problems manifest as file access errors
 
     See Also:
-        - Path utilities: ``spark_simplicity.io.validation.path_utils`` for path validation
-        - Format utilities: ``spark_simplicity.io.utils.format_utils`` for format conversion
+        - Path utilities: ``spark_simplicity.io.validation.path_utils`` for path
+          validation
+        - Format utilities: ``spark_simplicity.io.utils.format_utils`` for format
+          conversion
         - I/O operations: ``spark_simplicity.io`` for file reading and writing
 
     Note:

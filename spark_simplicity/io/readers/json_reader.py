@@ -2,18 +2,22 @@
 Spark Simplicity - JSON File Reader
 ===================================
 
-Intelligent JSON file reader with automatic format detection and comprehensive error recovery.
-This module provides enterprise-grade JSON ingestion capabilities that automatically detect
-and handle multiple JSON formats including JSONL, JSON arrays, and Spark-generated formats.
-Optimized for production environments with robust error handling and format compatibility.
+Intelligent JSON file reader with automatic format detection and comprehensive error
+recovery. This module provides enterprise-grade JSON ingestion capabilities that
+automatically detect and handle multiple JSON formats including JSONL, JSON arrays, and
+Spark-generated formats. Optimized for production environments with robust error
+handling and format compatibility.
 
 Key Features:
-    - **Automatic Format Detection**: Intelligent detection of JSONL, JSON arrays, and Spark formats
-    - **Multi-Strategy Loading**: Cascading fallback through different parsing approaches
+    - **Automatic Format Detection**: Intelligent detection of JSONL, JSON arrays, and
+    Spark formats
+    - **Multi-Strategy Loading**: Cascading fallback through different parsing
+    approaches
     - **Production Safety**: Comprehensive error handling and data validation
     - **Cluster Compatibility**: Integrated path validation for distributed processing
     - **Format Flexibility**: Support for various JSON formatting styles and structures
-    - **Performance Optimization**: Efficient loading strategies based on format characteristics
+    - **Performance Optimization**: Efficient loading strategies based on format
+    characteristics
 
 Supported JSON Formats:
     **JSON Lines (JSONL)**:
@@ -61,7 +65,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 from pyspark.sql import DataFrame, SparkSession
 
@@ -74,23 +78,27 @@ _json_logger = get_logger("spark_simplicity.io.readers.json")
 
 
 def _try_load_json_with_options(
-    spark: SparkSession, spark_path: str, reader_options: dict, user_options: dict
-) -> tuple[Optional[DataFrame], bool]:
+    spark: SparkSession,
+    spark_path: str,
+    reader_options: Dict[str, Any],
+    user_options: Dict[str, Any],
+) -> Tuple[Optional[DataFrame], bool]:
     """
-    Attempt JSON loading with specific reader configuration and comprehensive error handling.
+    Attempt JSON loading with specific reader configuration and comprehensive error
+    handling.
 
     Provides controlled JSON loading attempts with specific Spark reader options while
-    maintaining error isolation between different format strategies. This function enables
-    the cascading fallback approach where multiple JSON formats are attempted sequentially
-    until a successful parse is achieved.
+    maintaining error isolation between different format strategies. This function
+    enables the cascading fallback approach where multiple JSON formats are attempted
+    sequentially until a successful parse is achieved.
 
     Args:
         spark: Active SparkSession instance for DataFrame creation and JSON processing
         spark_path: Properly configured Spark path (with appropriate URI scheme)
-        reader_options: Dictionary of Spark DataFrameReader options for format-specific parsing:
+        reader_options: Dictionary of Spark options for format-specific parsing:
                        - 'multiLine': Boolean for multi-line JSON object handling
                        - 'allowComments': Boolean for JavaScript-style comment support
-                       - 'mode': Parsing mode ('PERMISSIVE', 'DROPMALFORMED', 'FAILFAST')
+                       - 'mode':Parsing mode ('PERMISSIVE', 'DROPMALFORMED', 'FAILFAST')
         user_options: User-provided additional options merged with reader_options
 
     Returns:
@@ -130,19 +138,22 @@ def load_json(
     spark: SparkSession,
     file_path: Union[str, Path],
     shared_mount: bool = False,
-    **options,
+    **options: Any,
 ) -> DataFrame:
     """
-    Load JSON files with intelligent format detection and enterprise-grade error recovery.
+    Load JSON files with intelligent format detection and enterprise-grade error
+    recovery.
 
-    Provides comprehensive JSON data ingestion with automatic format detection that eliminates
-    the need for manual format specification. This function implements a sophisticated cascading
-    strategy that attempts multiple JSON parsing approaches until successful data loading is
-    achieved, making it robust for handling diverse JSON sources in production environments.
+    Provides comprehensive JSON data ingestion with automatic format detection that
+    eliminates the need for manual format specification. This function implements a
+    sophisticated cascading strategy that attempts multiple JSON parsing approaches
+    until successful data loading is achieved, making it robust for handling diverse
+    JSON sources in production environments.
 
-    The function prioritizes efficiency by attempting the most performant formats first (JSONL)
-    before falling back to more resource-intensive approaches (multi-line JSON arrays), ensuring
-    optimal performance while maintaining comprehensive format compatibility.
+    The function prioritizes efficiency by attempting the most performant formats first
+     (JSONL) before falling back to more resource-intensive approaches
+     (multi-line JSON arrays), ensuring optimal performance while maintaining
+     comprehensive format compatibility.
 
     Args:
         spark: Active SparkSession instance configured for distributed JSON processing.
@@ -156,7 +167,7 @@ def load_json(
                      accessible by all cluster nodes. When True, triggers cluster-wide
                      validation to ensure all executors can access the JSON file.
                      When False, uses local file URI scheme for single-node access.
-        **options: Additional Spark DataFrameReader options for fine-tuning JSON parsing:
+        **options: Additional Spark DataFrameReader options for fine-tuning JSON parsing
                   - 'timestampFormat': Custom timestamp parsing pattern
                   - 'dateFormat': Custom date parsing pattern
                   - 'allowBackslashEscapingAnyCharacter': Boolean for escape handling
@@ -175,7 +186,7 @@ def load_json(
     Raises:
         FileNotFoundError: If the specified JSON file does not exist at the given path.
                           Error message includes full path for troubleshooting.
-        RuntimeError: If all parsing strategies fail, indicating incompatible JSON format,
+        RuntimeError: If all parsing strategies fail, indicating incompatible JSON forma
                      file corruption, permission issues, or cluster validation failures.
                      Error includes details of attempted strategies for diagnostics.
 
@@ -310,6 +321,10 @@ def load_json(
     # Configure Spark path with validation
     spark_path = configure_spark_path(file_path, shared_mount, spark)
 
+    # Convert options to properly typed dictionary
+    user_options: Dict[str, Any] = {}
+    user_options.update(options)
+
     # Define loading strategies in order of preference
     load_strategies = [
         ({"multiLine": False}, "JSONL format"),
@@ -321,16 +336,16 @@ def load_json(
     ]
 
     try:
-        # Try each loading strategy
         for reader_options, format_name in load_strategies:
             df, success = _try_load_json_with_options(
-                spark, spark_path, reader_options, options
+                spark, spark_path, reader_options, user_options  # type: ignore
             )
 
             if success:
                 _json_logger.info(
                     "JSON loaded successfully (%s): %s", format_name, file_path.name
                 )
+                assert df is not None  # success=True guarantees df is not None
                 return df
 
             _json_logger.debug("%s failed for %s", format_name, file_path.name)

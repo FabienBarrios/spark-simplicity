@@ -3,21 +3,25 @@ Spark Simplicity - Mount Point Validation
 ==========================================
 
 Enterprise-grade mount point validation for distributed Spark cluster environments.
-This module provides comprehensive cluster-wide validation of shared storage accessibility
+This module provides comprehensive cluster-wide validation of shared storage
+accessibility
 to ensure reliable I/O operations across all nodes in a Spark cluster. Essential for
 production deployments using NFS, shared drives, or other distributed storage systems.
 
 Key Features:
     - **Cluster-Wide Validation**: Tests mount point access on all Spark executor nodes
     - **Driver Node Testing**: Validates shared storage accessibility from Spark driver
-    - **Detailed Diagnostics**: Comprehensive error reporting with specific failure reasons
+    - **Detailed Diagnostics**: Comprehensive error reporting with specific failure
+      reasons
     - **Atomic Validation**: Ensures consistent mount point state across entire cluster
     - **Production Safety**: Prevents I/O failures through proactive validation
     - **Network Storage Support**: Compatible with NFS, SMB, HDFS, and cloud storage
 
 Validation Process:
-    - **Driver Validation**: First validates mount point accessibility on the driver node
-    - **Worker Distribution**: Creates validation tasks distributed across all executor nodes
+    - **Driver Validation**: First validates mount point accessibility on the driver
+      node
+    - **Worker Distribution**: Creates validation tasks distributed across all executor
+      nodes
     - **Parallel Testing**: Simultaneously tests mount point access on all cluster nodes
     - **Result Aggregation**: Collects and analyzes validation results from all nodes
     - **Failure Analysis**: Provides detailed diagnostics for any accessibility failures
@@ -25,7 +29,8 @@ Validation Process:
 Enterprise Features:
     - **Comprehensive Logging**: Detailed audit trail of all validation operations
     - **Failure Diagnostics**: Specific error messages for troubleshooting mount issues
-    - **Performance Optimization**: Parallel validation across cluster for minimal overhead
+    - **Performance Optimization**: Parallel validation across cluster for minimal
+      overhead
     - **Error Recovery**: Graceful handling of network timeouts and node failures
     - **Cluster Coordination**: Ensures synchronized validation across distributed nodes
 
@@ -40,7 +45,7 @@ Usage:
 import os
 import socket
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 from pyspark.sql import SparkSession
 
@@ -58,17 +63,20 @@ def _validate_mount_point_local(file_path: Union[str, Path]) -> bool:
     Performs initial validation of mount point accessibility on the driver node before
     proceeding with cluster-wide validation. This function serves as a "fail-fast"
     mechanism to detect mount point issues early without involving the entire cluster.
-    Essential for preventing distributed validation when basic driver-level access fails.
+    Essential for preventing distributed validation when basic driver-level access
+    fails.
 
     Validation Steps:
-        1. **Mount Point Detection**: Extracts mount point from file path using heuristics
+        1. **Mount Point Detection**: Extracts mount point from file path using
+           heuristics
         2. **Existence Check**: Verifies mount point directory exists on driver node
         3. **Permission Validation**: Confirms driver process has read access to mount
         4. **Directory Validation**: Ensures mount point is a valid directory structure
 
     Args:
         file_path: File path to validate for mount point accessibility. Can be either
-                  a string or Path object pointing to any file within the shared storage.
+                  a string or Path object pointing to any file within the shared
+                  storage.
                   The mount point is automatically extracted from this path.
 
     Returns:
@@ -77,7 +85,8 @@ def _validate_mount_point_local(file_path: Union[str, Path]) -> bool:
         False indicates validation failure with detailed error logging.
 
     Error Handling Strategy:
-        This function uses logging-based error reporting rather than exceptions to enable
+        This function uses logging-based error reporting rather than exceptions to
+        enable
         graceful degradation and comprehensive error collection across the cluster.
         All validation failures are logged with specific diagnostic information.
 
@@ -132,7 +141,8 @@ def _validate_mount_point_local(file_path: Union[str, Path]) -> bool:
     mount_point = _extract_mount_point(file_path)
     if not mount_point:
         _mount_logger.error(
-            "Invalid mount path format (please ensure the path is complete and correctly "
+            "Invalid mount path format (please ensure the path is complete and "
+            "correctly "
             "formatted): %s",
             file_path,
         )
@@ -149,7 +159,9 @@ def _validate_mount_point_local(file_path: Union[str, Path]) -> bool:
     return True
 
 
-def _create_worker_validation_task(mount_point: str, file_path: str):
+def _create_worker_validation_task(
+    mount_point: str, file_path: str
+) -> Callable[[], Dict[str, Any]]:
     """
     Create distributed validation task for execution on Spark executor nodes.
 
@@ -164,24 +176,31 @@ def _create_worker_validation_task(mount_point: str, file_path: str):
 
     Args:
         mount_point: Mount point directory path to validate on each executor node.
-                    Must be the exact mount point path (e.g., "/nfs/shared" not a file within).
-                    This path will be tested for existence, directory status, and accessibility.
+                    Must be the exact mount point path (e.g., "/nfs/shared" not a file
+                    within).
+                    This path will be tested for existence, directory status, and
+                    accessibility.
         file_path: Complete file path to validate on each executor node. This tests
-                  the specific file accessibility in addition to the general mount point.
-                  Enables validation of both mount infrastructure and file-specific access.
+                  the specific file accessibility in addition to the general mount
+                  point.
+                  Enables validation of both mount infrastructure and file-specific
+                  access.
 
     Returns:
         Callable function that performs comprehensive validation when executed on an
-        executor node. The function returns a dictionary with detailed validation results
+        executor node. The function returns a dictionary with detailed validation
+        results
         including hostname, accessibility status, and specific failure diagnostics.
 
     Task Function Behavior:
         The generated validation function performs these operations on each executor:
 
         1. **Hostname Detection**: Identifies the specific cluster node for diagnostics
-        2. **Mount Point Testing**: Validates mount directory existence and accessibility
+        2. **Mount Point Testing**: Validates mount directory existence and
+           accessibility
         3. **File Access Testing**: Confirms specific file availability and permissions
-        4. **Result Compilation**: Packages all validation results into structured format
+        4. **Result Compilation**: Packages all validation results into structured
+           format
 
     Result Structure:
         The validation task returns a dictionary containing:
@@ -218,7 +237,9 @@ def _create_worker_validation_task(mount_point: str, file_path: str):
         Validate multiple storage scenarios:
 
          # HDFS validation task
-         hdfs_task = _create_worker_validation_task("/hdfs/warehouse", "/hdfs/warehouse/table.parquet")
+         hdfs_task = _create_worker_validation_task(
+        ...     "/hdfs/warehouse", "/hdfs/warehouse/table.parquet"
+        ... )
 
          # SMB share validation task
          smb_task = _create_worker_validation_task("/mnt/smb", "/mnt/smb/reports.xlsx")
@@ -279,10 +300,12 @@ def _process_worker_validation_results(
     results: List[Dict[str, Any]],
 ) -> Tuple[bool, List[str]]:
     """
-    Process and analyze cluster-wide mount validation results with comprehensive diagnostics.
+    Process and analyze cluster-wide mount validation results with comprehensive
+    diagnostics.
 
     Analyzes validation results collected from all Spark executor nodes to determine
-    overall cluster mount point accessibility and provides detailed diagnostic information
+    overall cluster mount point accessibility and provides detailed diagnostic
+    information
     for any failures. This function serves as the central analysis point for distributed
     validation results, generating actionable error reports for system administrators.
 
@@ -291,7 +314,8 @@ def _process_worker_validation_results(
     cluster storage problems quickly and effectively.
 
     Args:
-        results: List of validation result dictionaries collected from all executor nodes.
+        results: List of validation result dictionaries collected from all executor
+                nodes.
                 Each dictionary contains detailed validation information from one node
                 including hostname, mount status, file accessibility, and error details.
                 Expected structure matches output from worker validation tasks.
@@ -318,7 +342,8 @@ def _process_worker_validation_results(
         Each failure is categorized and logged with specific diagnostic messages:
 
          # Mount infrastructure failures
-         "Worker node-01: Mount point not found (please check that the shared folder is mounted)"
+         "Worker node-01: Mount point not found (please check that the shared "
+         "folder is mounted)"
          "Worker node-02: No read access to mount point (please check permissions)"
 
          # File-specific failures
@@ -328,8 +353,10 @@ def _process_worker_validation_results(
     Logging Strategy:
         - **Success Cases**: No logging (silent success for performance)
         - **Failure Cases**: Detailed error logging with specific remediation guidance
-        - **Diagnostic Context**: Each log entry includes hostname and specific error type
-        - **Actionable Messages**: Error messages include specific steps to resolve issues
+        - **Diagnostic Context**: Each log entry includes hostname and specific error
+          type
+        - **Actionable Messages**: Error messages include specific steps to resolve
+          issues
 
     Examples:
         Process validation results from cluster nodes:
@@ -364,7 +391,8 @@ def _process_worker_validation_results(
 
     Cluster Management Integration:
         - **Monitoring Systems**: Log entries can be parsed by cluster monitoring tools
-        - **Alerting Integration**: Failed validation triggers can integrate with alerting
+        - **Alerting Integration**: Failed validation triggers can integrate with
+          alerting
         - **Troubleshooting Guides**: Error messages provide specific remediation steps
         - **Automation Support**: Structured error reporting enables automated responses
 
@@ -390,7 +418,8 @@ def _process_worker_validation_results(
         - Cluster monitoring tools: Integration with enterprise monitoring systems
 
     Note:
-        This function is critical for diagnosing distributed storage issues in production
+        This function is critical for diagnosing distributed storage issues in
+        production
         Spark clusters. The detailed diagnostic logging helps system administrators
         quickly identify and resolve mount point accessibility problems.
     """
@@ -408,27 +437,31 @@ def _process_worker_validation_results(
             # Detailed diagnostics
             if not result["mount_exists"]:
                 _mount_logger.error(
-                    "Worker %s: Mount point not found (please check that the shared folder "
+                    "Worker %s: Mount point not found (please check that the shared "
+                    "folder "
                     "is mounted on this machine): %s",
                     hostname,
                     result["mount_point"],
                 )
             elif not result["mount_readable"]:
                 _mount_logger.error(
-                    "Worker %s: No read access to mount point (please check your permissions on "
+                    "Worker %s: No read access to mount point (please check your "
+                    "permissions on "
                     "the shared folder): %s",
                     hostname,
                     result["mount_point"],
                 )
             elif not result["file_exists"]:
                 _mount_logger.error(
-                    "Worker %s: File not found (please verify the file path and name): %s",
+                    "Worker %s: File not found (please verify the file path and "
+                    "name): %s",
                     hostname,
                     result["file_path"],
                 )
             elif not result["file_readable"]:
                 _mount_logger.error(
-                    "Worker %s: No read access to file (please check your permissions for "
+                    "Worker %s: No read access to file (please check your permissions "
+                    "for "
                     "this file): %s",
                     hostname,
                     result["file_path"],
@@ -444,7 +477,8 @@ def _validate_mount_point_workers(
     Execute comprehensive mount point validation across all Spark executor nodes.
 
     Orchestrates distributed validation of mount point accessibility by creating and
-    executing validation tasks on every Spark executor node in the cluster. This function
+    executing validation tasks on every Spark executor node in the cluster. This
+    function
     ensures that shared storage is consistently accessible across the entire distributed
     environment before proceeding with I/O operations.
 
@@ -456,7 +490,8 @@ def _validate_mount_point_workers(
         1. **Mount Point Extraction**: Identifies mount point from provided file path
         2. **Executor Discovery**: Determines number of active Spark executor nodes
         3. **Task Distribution**: Creates RDD distributed across all executor nodes
-        4. **Parallel Validation**: Executes validation tasks simultaneously on all nodes
+        4. **Parallel Validation**: Executes validation tasks simultaneously on all
+           nodes
         5. **Result Collection**: Gathers validation results from all executor nodes
         6. **Analysis**: Processes results and generates diagnostic information
 
@@ -464,14 +499,19 @@ def _validate_mount_point_workers(
         spark: Active SparkSession instance used for distributed task execution.
               Must be properly configured with executor nodes for accurate validation.
               The session provides access to cluster topology and task distribution.
-        file_path: File path to validate across the cluster. Can be string or Path object.
-                  The mount point is automatically extracted from this path for validation.
+        file_path: File path to validate across the cluster. Can be string or Path
+                  object.
+                  The mount point is automatically extracted from this path for
+                  validation.
                   Both mount point and specific file accessibility are tested.
 
     Returns:
-        Boolean indicating whether mount point and file are accessible on ALL worker nodes.
-        True means every executor node can access both the mount point and specific file.
-        False indicates at least one node has accessibility issues with detailed logging.
+        Boolean indicating whether mount point and file are accessible on ALL worker
+        nodes.
+        True means every executor node can access both the mount point and specific
+        file.
+        False indicates at least one node has accessibility issues with detailed
+        logging.
 
     Cluster Configuration Requirements:
         **Spark Configuration**:
@@ -515,7 +555,9 @@ def _validate_mount_point_workers(
         Validate large cluster deployment:
 
          # Test mount point on 50-node cluster
-         cluster_success = _validate_mount_point_workers(spark, "/hdfs/warehouse/table.parquet")
+         cluster_success = _validate_mount_point_workers(
+        ...     spark, "/hdfs/warehouse/table.parquet"
+        ... )
          # Validation executes in parallel across all 50 nodes
 
     Performance Characteristics:
@@ -581,7 +623,8 @@ def _validate_mount_point_workers(
 
     try:
         # Create RDD to execute validation on each executor
-        num_executors = int(spark.conf.get("spark.executor.instances", "2"))
+        num_executors_str = spark.conf.get("spark.executor.instances", "2")
+        num_executors = int(num_executors_str or "2")
         rdd = spark.sparkContext.parallelize(range(num_executors), num_executors)
 
         # Create and execute validation task
@@ -606,7 +649,8 @@ def _validate_mount_point_workers(
 
 def _validate_mount_point(spark: SparkSession, file_path: Union[str, Path]) -> bool:
     """
-    Execute complete cluster-wide mount point validation for distributed Spark operations.
+    Execute complete cluster-wide mount point validation for distributed Spark
+    operations.
 
     Performs comprehensive validation of shared storage accessibility across the entire
     Spark cluster including both driver and executor nodes. This function serves as the
@@ -614,8 +658,10 @@ def _validate_mount_point(spark: SparkSession, file_path: Union[str, Path]) -> b
     that all cluster nodes can consistently access shared storage before proceeding
     with data processing operations.
 
-    The validation follows a two-phase approach: first validating driver node accessibility
-    for fast failure detection, then performing distributed validation across all executor
+    The validation follows a two-phase approach: first validating driver node
+    accessibility
+    for fast failure detection, then performing distributed validation across all
+    executor
     nodes for comprehensive cluster coverage. This strategy optimizes performance while
     ensuring thorough validation coverage.
 
@@ -643,7 +689,8 @@ def _validate_mount_point(spark: SparkSession, file_path: Union[str, Path]) -> b
     Returns:
         Boolean indicating complete cluster validation success:
         - True: ALL cluster nodes (driver + all executors) can access mount and file
-        - False: At least one cluster node has accessibility issues (see logs for details)
+        - False: At least one cluster node has accessibility issues (see logs for
+          details)
 
     Validation Scope:
         **Infrastructure Validation**:
@@ -660,7 +707,8 @@ def _validate_mount_point(spark: SparkSession, file_path: Union[str, Path]) -> b
         The function uses comprehensive logging instead of exceptions to enable:
         - **Detailed Diagnostics**: Specific error messages for each failure type
         - **Cluster Visibility**: Node-by-node failure analysis and reporting
-        - **Troubleshooting Support**: Actionable error messages with resolution guidance
+        - **Troubleshooting Support**: Actionable error messages with resolution
+          guidance
         - **Production Safety**: Graceful handling without disrupting cluster operations
 
     Examples:

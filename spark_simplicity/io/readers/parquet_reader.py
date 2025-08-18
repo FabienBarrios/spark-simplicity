@@ -2,10 +2,11 @@
 Spark Simplicity - Parquet File Reader
 ======================================
 
-High-performance Parquet file reader optimized for enterprise-grade analytics and big data
-processing. This module provides advanced Parquet reading capabilities with intelligent
-column selection, distributed processing optimization, and comprehensive cluster validation.
-Designed for production data lake environments and large-scale analytics workflows.
+High-performance Parquet file reader optimized for enterprise-grade analytics and big
+data processing. This module provides advanced Parquet reading capabilities with
+intelligent column selection, distributed processing optimization, and comprehensive
+cluster validation. Designed for production data lake environments and large-scale
+analytics workflows.
 
 Key Features:
     - **Columnar Performance**: Optimized reading of Apache Parquet columnar format
@@ -56,7 +57,7 @@ Usage:
 """
 
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from pyspark.sql import DataFrame, SparkSession
 
@@ -72,19 +73,20 @@ def load_parquet(
     file_path: Union[str, Path],
     columns: Optional[List[str]] = None,
     shared_mount: bool = False,
-    **options,
+    **options: Any,
 ) -> DataFrame:
     """
-    Load Parquet files with enterprise-grade performance optimization and cluster validation.
+    Load Parquet files with enterprise-grade performance optimization and cluster
+    validation.
 
-    Provides high-performance Parquet data ingestion optimized for analytics workloads and
-    data lake processing. This function leverages Spark's native columnar processing capabilities
-    while adding intelligent column selection, comprehensive error handling, and cluster-wide
-    validation essential for production data processing environments.
+    Provides high-performance Parquet data ingestion optimized for analytics workloads
+    and data lake processing. This function leverages Spark's native columnar processing
+    capabilities while adding intelligent column selection, comprehensive error handling
+    , and cluster-wide validation essential for production data processing environments.
 
-    The function is specifically designed for large-scale analytics scenarios where Parquet's
-    columnar format provides significant performance advantages through predicate pushdown,
-    compression efficiency, and schema evolution capabilities.
+    The function is specifically designed for large-scale analytics scenarios where
+    Parquet's columnar format provides significant performance advantages through
+    predicate pushdown, compression efficiency, and schema evolution capabilities.
 
     Args:
         spark: Active SparkSession instance configured for distributed processing.
@@ -94,15 +96,16 @@ def load_parquet(
                   Can be provided as string or Path object. Supports single files,
                   partitioned directories, and multi-file datasets. Compatible with
                   local storage, network mounts, HDFS, and cloud storage systems.
-        columns: Optional list of specific column names to load for performance optimization.
-                When specified, enables predicate pushdown to read only required columns,
-                significantly improving performance and reducing memory usage for wide tables.
-                Column names must exist in the Parquet schema or ValueError will be raised.
+        columns: Optional list of specific column names to load for performance
+                optimization. When specified, enables predicate pushdown to read only
+                required columns, significantly improving performance and reducing
+                memory usage for wide tables. Column names must exist in the Parquet
+                schema or ValueError will be raised.
         shared_mount: Boolean indicating whether the file resides on shared storage
                      accessible by all cluster nodes. When True, triggers comprehensive
                      cluster validation to ensure all executors can access the data.
                      When False, uses local file URI scheme for single-node processing.
-        **options: Additional Spark DataFrameReader options for fine-tuning Parquet processing:
+        **options: Additional Spark options for fine-tuning Parquet processing:
                   - 'mergeSchema': Boolean to merge schemas across multiple files
                   - 'pathGlobFilter': Glob pattern to filter files in directory
                   - 'recursiveFileLookup': Boolean to recursively scan subdirectories
@@ -122,9 +125,9 @@ def load_parquet(
                           Error message includes full path for troubleshooting.
         ValueError: If requested columns are not found in the Parquet schema.
                    The error specifies which columns are missing for easy correction.
-        RuntimeError: If Parquet loading fails due to format corruption, permission issues,
-                     cluster validation failures, or resource constraints. Includes
-                     detailed error context for troubleshooting and resolution.
+        RuntimeError: If Parquet loading fails due to format corruption, permission
+                     issues, cluster validation failures, or resource constraints.
+                     Includes detailed error context for troubleshooting and resolution.
 
     Performance Optimization Features:
         **Column Selection (Predicate Pushdown)**:
