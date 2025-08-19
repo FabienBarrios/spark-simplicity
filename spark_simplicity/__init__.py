@@ -57,10 +57,20 @@ from .notification_service import create_email_sender, send_error_email
 # Core functionality imports
 from .session import SparkConfig, get_simple_spark_session, get_spark_session
 
+# Join operations
+from .joins import sql_join, sql_union, sql_union_flexible
+
+# Utility functions
+from .utils import (
+    clean_nulls_and_empty,
+    analyze_data_quality,
+    profile_dataframe_performance,
+    compare_dataframes,
+)
+
 # All public exports
 __all__ = [
     # Version and metadata
-    "__version__",
     "__author__",
     "__email__",
     "__license__",
@@ -82,6 +92,15 @@ __all__ = [
     "write_excel",
     "write_positional",
     "get_file_info",
+    # Join operations
+    "sql_join",
+    "sql_union",
+    "sql_union_flexible",
+    # Utility functions
+    "clean_nulls_and_empty",
+    "analyze_data_quality",
+    "profile_dataframe_performance",
+    "compare_dataframes",
     # Logging and notifications
     "get_logger",
     "create_email_sender",
@@ -146,6 +165,6 @@ _check_dependencies()
 # Optional: Show version information (can be disabled with environment variable)
 if os.getenv("SPARK_SIMPLICITY_VERBOSE", "").lower() in ("1", "true", "yes"):
     _init_logger = get_logger("spark_simplicity.init")
-    _init_logger.info("Spark Simplicity %s loaded successfully!", __version__)
+    _init_logger.info("Spark Simplicity loaded successfully!")
     _init_logger.info("   %d functions available", len(__all__))
     _init_logger.info("   Ready to simplify your Spark workflows!")
